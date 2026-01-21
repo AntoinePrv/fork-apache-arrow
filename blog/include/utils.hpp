@@ -1,14 +1,23 @@
 #pragma once
 
 #include <charconv>
+#include <concepts>
 #include <cstdint>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
 
+template <std::unsigned_integral UintType = std::size_t, std::ranges::input_range Range>
+auto MaxWidthBits(Range&& in) -> std::size_t {
+  auto bit_width = [](auto x) { return std::bit_width(x); };
+  const auto value = std::ranges::max(in, {}, bit_width);
+  return static_cast<UintType>(bit_width(value));
+}
+
 template <typename Uint = std::size_t>
-auto parseCsvInt(std::string_view s) -> std::vector<Uint> {
+auto ParseCsvInt(std::string_view s) -> std::vector<Uint> {
   std::vector<Uint> out = {};
   std::size_t pos = 0;
 
@@ -83,4 +92,26 @@ inline auto RandomBytes(std::size_t n, std::mt19937::result_type seed = 33)
     result.push_back(dist(gen));
   }
   return result;
+}
+
+struct MakeAlphaValuesParams {
+  std::size_t packed_bit_size;
+  std::size_t n_values;
+  std::optional<std::size_t> total_bits = std::nullopt;
+  std::string_view alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  char extra_bit = '*';
+};
+
+inline auto MakeAlphaValues(const MakeAlphaValuesParams& params) -> std::vector<char> {
+  const auto asked_letter_bits = params.packed_bit_size * params.n_values;
+  const auto total_bits = params.total_bits.value_or(asked_letter_bits);
+  auto out = std::vector<char>(total_bits, params.extra_bit);
+
+  const auto letter_bits = std::min(total_bits, asked_letter_bits);
+  for (std::size_t i = 0; i < letter_bits; ++i) {
+    const auto val_idx = i / params.packed_bit_size;
+    out[i] = params.alphabet[val_idx % params.alphabet.size()];
+  }
+
+  return out;
 }
