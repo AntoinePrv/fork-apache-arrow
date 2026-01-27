@@ -18,7 +18,7 @@ auto get_ld_library_path() -> std::string & {
   return ENV_LD_LIBRARY_PATH;
 }
 
-const bool INIT = []() {
+const bool INIT_LOCAL = []() {
   // Fix for LD_LIBRARY_PATH hard-coded in kernel.json
   if (auto conda_prefix = get_conda_prefix()) {
     auto &ld_library_path = get_ld_library_path();
@@ -28,10 +28,6 @@ const bool INIT = []() {
 
   // Required libraries to link
   Cpp::LoadLibrary("libxwidgets");
-
-  // Arrow internal code
-  Cpp::AddIncludePath("../cpp/src/");
-  Cpp::AddIncludePath("./include/");
 
   return true;
 }();
@@ -43,3 +39,11 @@ const bool INIT = []() {
 #undef __ARM_NEON_H
 #include "/Users/antoine/workspace/github.com/apache/arrow/.pixi/envs/jupyter/lib/clang/20/include/arm_neon.h"
 #endif
+
+const bool INIT_ALL = []() {
+  // Arrow internal code
+  Cpp::AddIncludePath("../cpp/src/");
+  Cpp::AddIncludePath("./include/");
+
+  return true;
+}();
