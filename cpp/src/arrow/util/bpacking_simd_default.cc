@@ -19,6 +19,8 @@
 #  define UNPACK_PLATFORM unpack_neon
 #elif defined(ARROW_HAVE_SSE4_2)
 #  define UNPACK_PLATFORM unpack_sse4_2
+#else
+#  define UNPACK_PLATFORM unpack_128
 #endif
 
 #if defined(UNPACK_PLATFORM)
