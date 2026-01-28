@@ -12,23 +12,32 @@
 
 template <std::unsigned_integral UintType = std::uint64_t>
 class IntegerToolbar {
- public:
+public:
   using value_type = UintType;
 
-  IntegerToolbar() {
-    m_uint = xw::dropdown(
-        std::vector<std::string>({"uint8_t", "uint16_t", "uint32_t", "uint64_t"}),
-        "uint32_t");
-    m_uint.description = "Integer type";
+  struct InitParams {
+    std::string_view number_description = "Integer value";
+    value_type number_min = 0;
+    value_type number_default = 13;
+    std::string_view uint_description = "Integer type";
+  };
+
+  IntegerToolbar(InitParams const &params = {}) {
+    m_uint = xw::dropdown(std::vector<std::string>(
+                              {"uint8_t", "uint16_t", "uint32_t", "uint64_t"}),
+                          "uint32_t");
+    m_uint.description = params.uint_description;
     m_uint.value = "uint32_t";
-    m_number.min = 0;
-    m_number.value = 13;
-    m_number.description = "Integer value";
+    m_uint.style().description_width = "120px";
+    m_number.min = params.number_min;
+    m_number.value = params.number_default;
+    m_number.description = params.number_description;
+    m_number.style().description_width = "120px";
 
     m_toolbar.add(m_number);
     m_toolbar.add(m_uint);
 
-    XOBSERVE(m_uint, value, [&](const auto& s) {
+    XOBSERVE(m_uint, value, [&](const auto &s) {
       const auto uint = ParseUint(s.value());
       const std::uint64_t uint_max = UintMax(uint);
       m_number.value = std::clamp(m_number.value(), std::uint64_t{0}, uint_max);
@@ -36,9 +45,8 @@ class IntegerToolbar {
     });
   }
 
-  template <typename Func>
-  void on_change(Func func) {
-    auto callback = [this, func = std::move(func)](const auto& w) {
+  template <typename Func> void on_change(Func func) {
+    auto callback = [this, func = std::move(func)](const auto &w) {
       auto g = m_output.guard();
       xcpp::clear_output();
       const auto uint = ParseUint(m_uint.value());
@@ -51,10 +59,10 @@ class IntegerToolbar {
   void display() {
     xcpp::display(m_toolbar);
     xcpp::display(m_output);
-    m_number.value = m_number.value;  // Force first render
+    m_number.value = m_number.value; // Force first render
   }
 
- private:
+private:
   xw::dropdown m_uint = {};
   xw::number_bounded<value_type> m_number = {};
   xw::box m_toolbar = {};
@@ -63,22 +71,23 @@ class IntegerToolbar {
 
 template <std::unsigned_integral UintType = std::uint64_t>
 class SequenceToolbar {
- public:
+public:
   using value_type = UintType;
 
   struct InitParams {
     std::size_t interval_ms = 500;
   };
 
-  explicit SequenceToolbar(InitParams const& p = {}) {
+  explicit SequenceToolbar(InitParams const &p = {}) {
     m_output.layout().min_height = "220px";
     m_csv_sequence.description = "Number sequence";
     m_csv_sequence.style().description_width = "120px";
     m_csv_sequence.value = "0, 1, 2, 3, 4, 5, 6, 7";
     m_player.interval = p.interval_ms;
-    m_unpacked_uint = xw::dropdown(
-        std::vector<std::string>({"uint8_t", "uint16_t", "uint32_t", "uint64_t"}),
-        "uint32_t");
+    m_unpacked_uint =
+        xw::dropdown(std::vector<std::string>(
+                         {"uint8_t", "uint16_t", "uint32_t", "uint64_t"}),
+                     "uint32_t");
     m_unpacked_uint.description = "Integer type";
     m_unpacked_uint.style().description_width = "120px";
     m_unpacked_uint.value = "uint32_t";
@@ -93,33 +102,37 @@ class SequenceToolbar {
     m_toolbar_seq.add(m_csv_sequence);
     m_toolbar_seq.add(m_player);
 
-    auto set_bit_width_reset_player = [this](auto&&...) {
+    auto set_bit_width_reset_player = [this](auto &&...) {
       m_player.value = 0;
       m_player.playing = true;
       try {
         m_packed_bit_size.value = best_packed_bit_size();
-      } catch (const std::exception& e) {
+      } catch (const std::exception &e) {
       }
     };
     m_csv_sequence.on_submit(std::move(set_bit_width_reset_player));
 
-    auto set_bit_width_pause_player = [this](auto&&...) {
+    auto set_bit_width_pause_player = [this](auto &&...) {
       m_player.playing = false;
       try {
         m_packed_bit_size.value = best_packed_bit_size();
-      } catch (const std::exception& e) {
+      } catch (const std::exception &e) {
       }
     };
     XOBSERVE(m_csv_sequence, value, std::move(set_bit_width_pause_player));
   }
 
-  auto unpacked_uint() const -> Uint { return ParseUint(m_unpacked_uint.value()); }
+  auto unpacked_uint() const -> Uint {
+    return ParseUint(m_unpacked_uint.value());
+  }
 
   auto unpacked_uint_max_bits() const -> value_type {
     return static_cast<value_type>(unpacked_uint());
   }
 
-  auto packed_bit_size() const -> value_type { return m_packed_bit_size.value(); }
+  auto packed_bit_size() const -> value_type {
+    return m_packed_bit_size.value();
+  }
 
   auto best_packed_bit_size() const -> value_type {
     return MaxWidthBits<value_type>(values());
@@ -131,9 +144,8 @@ class SequenceToolbar {
 
   auto step() const -> std::size_t { return m_player.value(); }
 
-  template <typename Func>
-  void on_change(Func func) {
-    auto callback = [this, func = std::move(func)](const auto& w) {
+  template <typename Func> void on_change(Func func) {
+    auto callback = [this, func = std::move(func)](const auto &w) {
       auto g = m_output.guard();
       xcpp::clear_output();
       func(std::as_const(*this));
@@ -146,10 +158,10 @@ class SequenceToolbar {
     xcpp::display(m_toolbar_params);
     xcpp::display(m_toolbar_seq);
     xcpp::display(m_output);
-    m_player.value = m_player.value;  // Force first render
+    m_player.value = m_player.value; // Force first render
   }
 
- private:
+private:
   xw::dropdown m_unpacked_uint = {};
   xw::number_bounded<value_type> m_packed_bit_size = {};
   xw::text m_csv_sequence = {};
