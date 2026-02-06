@@ -38,7 +38,8 @@ const bool INIT_LOCAL = []() {
 #include "/Users/antoine/workspace/github.com/apache/arrow/.pixi/envs/jupyter/lib/clang/20/include/arm_vector_types.h"
 #undef __ARM_NEON_H
 #include "/Users/antoine/workspace/github.com/apache/arrow/.pixi/envs/jupyter/lib/clang/20/include/arm_neon.h"
-#endif
+
+#endif // ! __EMSCRIPTEN__
 
 const bool INIT_ALL = []() {
   // Arrow internal code

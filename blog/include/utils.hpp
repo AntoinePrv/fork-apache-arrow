@@ -89,12 +89,16 @@ constexpr auto UintMax(Uint u) -> std::uint64_t {
   return kOnes >> (8 * sizeof(std::uint64_t) - static_cast<std::uint8_t>(u));
 }
 
-inline auto RandomBytes(std::size_t n, std::mt19937::result_type seed = 33)
-    -> std::vector<uint8_t> {
+inline auto RandomValues(std::size_t n, std::size_t packed_bit_size,
+                         std::mt19937::result_type seed = 33)
+    -> std::vector<std::uint64_t> {
   std::mt19937 gen(seed);
-  std::uniform_int_distribution<std::uint8_t> dist(0, 255);
 
-  auto result = std::vector<std::uint8_t>();
+  // Calculate max value that fits in packed_bit_size bits
+  const auto max_value = (std::uint64_t{1} << packed_bit_size) - std::uint64_t{1};
+  std::uniform_int_distribution<std::uint64_t> dist(0, max_value);
+
+  auto result = std::vector<std::uint64_t>();
   result.reserve(n);
   for (std::size_t i = 0; i < n; ++i) {
     result.push_back(dist(gen));
