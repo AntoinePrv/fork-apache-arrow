@@ -61,8 +61,8 @@ lld = "*"
 cmd = """
 git ls-files | grep -E '\\.(cpp|h|c|cc|hpp)$' | xargs clang-format -i
 """
-inputs=["cpp/**/*.*pp", "cpp/**/*.h", "cpp/**/*.cc"]
-outputs=["cpp/**/*.*pp", "cpp/**/*.h", "cpp/**/*.cc"]
+inputs=["**/*.*pp", "**/*.h", "**/*.cc"]
+outputs=["**/*.*pp", "**/*.h", "**/*.cc"]
 
 [feature.lsp.dependencies]
 typos-lsp = "*"

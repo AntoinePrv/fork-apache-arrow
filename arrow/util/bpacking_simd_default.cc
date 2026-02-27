@@ -24,6 +24,8 @@
 #if defined(UNPACK_PLATFORM)
 
 #  include "arrow/util/bpacking_dispatch_internal.h"
+#  include "arrow/util/bpacking_scalar_generated_internal.h"
+#  include "arrow/util/bpacking_simd128_generated_internal.h"
 #  include "arrow/util/bpacking_simd_internal.h"
 #  include "arrow/util/bpacking_simd_kernel_internal.h"
 
@@ -42,6 +44,80 @@ template void UNPACK_PLATFORM<uint8_t>(const uint8_t*, uint8_t*, const UnpackOpt
 template void UNPACK_PLATFORM<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
 template void UNPACK_PLATFORM<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
 template void UNPACK_PLATFORM<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
+
+#  if defined(ARROW_HAVE_NEON)
+#    define UNPACK_PLATFORM_OLD unpack_neon_old
+#  elif defined(ARROW_HAVE_SSE4_2)
+#    define UNPACK_PLATFORM_OLD unpack_sse4_2_old
+#  endif
+
+template <typename Uint>
+void UNPACK_PLATFORM_OLD(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<Simd128UnpackerForWidth>(in, out, opts);
+}
+
+template void UNPACK_PLATFORM_OLD<bool>(const uint8_t*, bool*, const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint8_t>(const uint8_t*, uint8_t*,
+                                           const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint16_t>(const uint8_t*, uint16_t*,
+                                            const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint32_t>(const uint8_t*, uint32_t*,
+                                            const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint64_t>(const uint8_t*, uint64_t*,
+                                            const UnpackOptions&);
+
+#  undef UNPACK_PLATFORM_OLD
+
+#  if defined(ARROW_HAVE_NEON)
+#    define UNPACK_PLATFORM_SCALAR_BATCH unpack_neon_scalar_batch
+#  elif defined(ARROW_HAVE_SSE4_2)
+#    define UNPACK_PLATFORM_SCALAR_BATCH unpack_sse4_2_scalar_batch
+#  endif
+
+template <typename Uint>
+void UNPACK_PLATFORM_SCALAR_BATCH(const uint8_t* in, Uint* out,
+                                  const UnpackOptions& opts) {
+  return unpack_jump<ScalarUnpackerForWidth>(in, out, opts);
+}
+
+template void UNPACK_PLATFORM_SCALAR_BATCH<bool>(const uint8_t*, bool*,
+                                                 const UnpackOptions&);
+template void UNPACK_PLATFORM_SCALAR_BATCH<uint8_t>(const uint8_t*, uint8_t*,
+                                                    const UnpackOptions&);
+template void UNPACK_PLATFORM_SCALAR_BATCH<uint16_t>(const uint8_t*, uint16_t*,
+                                                     const UnpackOptions&);
+template void UNPACK_PLATFORM_SCALAR_BATCH<uint32_t>(const uint8_t*, uint32_t*,
+                                                     const UnpackOptions&);
+template void UNPACK_PLATFORM_SCALAR_BATCH<uint64_t>(const uint8_t*, uint64_t*,
+                                                     const UnpackOptions&);
+
+#  undef UNPACK_PLATFORM_SCALAR_BATCH
+
+#  if defined(ARROW_HAVE_NEON)
+#    define UNPACK_PLATFORM_EXACT unpack_neon_exact
+#  elif defined(ARROW_HAVE_SSE4_2)
+#    define UNPACK_PLATFORM_EXACT unpack_sse4_2_exact
+#  endif
+
+template <typename UnpackedUint, int kPackedBitSize>
+using NoOpKernel128 = NoOpKernel<KernelTraits<UnpackedUint, kPackedBitSize, 128>>;
+
+template <typename Uint>
+void UNPACK_PLATFORM_EXACT(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<NoOpKernel128>(in, out, opts);
+}
+
+template void UNPACK_PLATFORM_EXACT<bool>(const uint8_t*, bool*, const UnpackOptions&);
+template void UNPACK_PLATFORM_EXACT<uint8_t>(const uint8_t*, uint8_t*,
+                                             const UnpackOptions&);
+template void UNPACK_PLATFORM_EXACT<uint16_t>(const uint8_t*, uint16_t*,
+                                              const UnpackOptions&);
+template void UNPACK_PLATFORM_EXACT<uint32_t>(const uint8_t*, uint32_t*,
+                                              const UnpackOptions&);
+template void UNPACK_PLATFORM_EXACT<uint64_t>(const uint8_t*, uint64_t*,
+                                              const UnpackOptions&);
+
+#  undef UNPACK_PLATFORM_EXACT
 
 }  // namespace arrow::internal::bpacking
 

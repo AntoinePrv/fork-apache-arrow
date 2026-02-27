@@ -17,8 +17,10 @@
 
 #include "arrow/util/bpacking_dispatch_internal.h"
 #include "arrow/util/bpacking_internal.h"
+#include "arrow/util/bpacking_scalar_generated_internal.h"
 #include "arrow/util/bpacking_simd512_generated_internal.h"
 #include "arrow/util/bpacking_simd_internal.h"
+#include "arrow/util/bpacking_simd_kernel_internal.h"
 
 namespace arrow::internal::bpacking {
 
@@ -32,5 +34,39 @@ template void unpack_avx512<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptio
 template void unpack_avx512<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
 template void unpack_avx512<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
 template void unpack_avx512<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
+
+template <typename Uint>
+void unpack_avx512_scalar_batch(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<ScalarUnpackerForWidth>(in, out, opts);
+}
+
+template void unpack_avx512_scalar_batch<bool>(const uint8_t*, bool*,
+                                               const UnpackOptions&);
+template void unpack_avx512_scalar_batch<uint8_t>(const uint8_t*, uint8_t*,
+                                                  const UnpackOptions&);
+template void unpack_avx512_scalar_batch<uint16_t>(const uint8_t*, uint16_t*,
+                                                   const UnpackOptions&);
+template void unpack_avx512_scalar_batch<uint32_t>(const uint8_t*, uint32_t*,
+                                                   const UnpackOptions&);
+template void unpack_avx512_scalar_batch<uint64_t>(const uint8_t*, uint64_t*,
+                                                   const UnpackOptions&);
+
+template <typename UnpackedUint, int kPackedBitSize>
+using NoOpKernel512 = NoOpKernel<KernelTraits<UnpackedUint, kPackedBitSize, 512>>;
+
+template <typename Uint>
+void unpack_avx512_exact(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<NoOpKernel512>(in, out, opts);
+}
+
+template void unpack_avx512_exact<bool>(const uint8_t*, bool*, const UnpackOptions&);
+template void unpack_avx512_exact<uint8_t>(const uint8_t*, uint8_t*,
+                                           const UnpackOptions&);
+template void unpack_avx512_exact<uint16_t>(const uint8_t*, uint16_t*,
+                                            const UnpackOptions&);
+template void unpack_avx512_exact<uint32_t>(const uint8_t*, uint32_t*,
+                                            const UnpackOptions&);
+template void unpack_avx512_exact<uint64_t>(const uint8_t*, uint64_t*,
+                                            const UnpackOptions&);
 
 }  // namespace arrow::internal::bpacking

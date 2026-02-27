@@ -22,7 +22,9 @@
 #include <benchmark/benchmark.h>
 
 #include "arrow/testing/util.h"
+#include "arrow/util/bpacking_dispatch_internal.h"
 #include "arrow/util/bpacking_internal.h"
+#include "arrow/util/bpacking_scalar_generated_internal.h"
 #include "arrow/util/bpacking_scalar_internal.h"
 #include "arrow/util/bpacking_simd_internal.h"
 
@@ -141,15 +143,46 @@ void BM_UnpackUint64(benchmark::State& state, UnpackFunc<uint64_t> unpack,
   return BM_Unpack<uint64_t>(state, unpack, skip, std::move(skip_msg));
 }
 
-BENCHMARK_CAPTURE(BM_UnpackBool, Scalar, &bpacking::unpack_scalar<bool>)
+#if defined(ARROW_HAVE_SSE4_2)
+using bpacking::unpack_sse4_2_exact;
+using bpacking::unpack_sse4_2_old;
+using bpacking::unpack_sse4_2_scalar_batch;
+#endif
+#if defined(ARROW_HAVE_RUNTIME_AVX2)
+using bpacking::unpack_avx2_exact;
+using bpacking::unpack_avx2_old;
+using bpacking::unpack_avx2_scalar_batch;
+#endif
+#if defined(ARROW_HAVE_RUNTIME_AVX512)
+using bpacking::unpack_avx512_exact;
+using bpacking::unpack_avx512_scalar_batch;
+#endif
+#if defined(ARROW_HAVE_NEON)
+using bpacking::unpack_neon_exact;
+using bpacking::unpack_neon_old;
+using bpacking::unpack_neon_scalar_batch;
+#endif
+
+BENCHMARK_CAPTURE(BM_UnpackBool, ScalarBatch, &bpacking::unpack_scalar<bool>)
     ->ArgsProduct(kBitWidthsNumValuesBool);
-BENCHMARK_CAPTURE(BM_UnpackUint8, Scalar, &bpacking::unpack_scalar<uint8_t>)
+BENCHMARK_CAPTURE(BM_UnpackUint8, ScalarBatch, &bpacking::unpack_scalar<uint8_t>)
     ->ArgsProduct(kBitWidthsNumValues8);
-BENCHMARK_CAPTURE(BM_UnpackUint16, Scalar, &bpacking::unpack_scalar<uint16_t>)
+BENCHMARK_CAPTURE(BM_UnpackUint16, ScalarBatch, &bpacking::unpack_scalar<uint16_t>)
     ->ArgsProduct(kBitWidthsNumValues16);
-BENCHMARK_CAPTURE(BM_UnpackUint32, Scalar, &bpacking::unpack_scalar<uint32_t>)
+BENCHMARK_CAPTURE(BM_UnpackUint32, ScalarBatch, &bpacking::unpack_scalar<uint32_t>)
     ->ArgsProduct(kBitWidthsNumValues32);
-BENCHMARK_CAPTURE(BM_UnpackUint64, Scalar, &bpacking::unpack_scalar<uint64_t>)
+BENCHMARK_CAPTURE(BM_UnpackUint64, ScalarBatch, &bpacking::unpack_scalar<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, ScalarExact, &bpacking::unpack_scalar_exact<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, ScalarExact, &bpacking::unpack_scalar_exact<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, ScalarExact, &bpacking::unpack_scalar_exact<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, ScalarExact, &bpacking::unpack_scalar_exact<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, ScalarExact, &bpacking::unpack_scalar_exact<uint64_t>)
     ->ArgsProduct(kBitWidthsNumValues64);
 
 #if defined(ARROW_HAVE_SSE4_2)
@@ -162,6 +195,42 @@ BENCHMARK_CAPTURE(BM_UnpackUint16, Sse42, &bpacking::unpack_sse4_2<uint16_t>)
 BENCHMARK_CAPTURE(BM_UnpackUint32, Sse42, &bpacking::unpack_sse4_2<uint32_t>)
     ->ArgsProduct(kBitWidthsNumValues32);
 BENCHMARK_CAPTURE(BM_UnpackUint64, Sse42, &bpacking::unpack_sse4_2<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Sse42Generated, &unpack_sse4_2_old<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Sse42Generated, &unpack_sse4_2_old<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Sse42Generated, &unpack_sse4_2_old<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Sse42Generated, &unpack_sse4_2_old<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Sse42Generated, &unpack_sse4_2_old<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Sse42ScalarBatch, &unpack_sse4_2_scalar_batch<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Sse42ScalarBatch, &unpack_sse4_2_scalar_batch<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Sse42ScalarBatch,
+                  &unpack_sse4_2_scalar_batch<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Sse42ScalarBatch,
+                  &unpack_sse4_2_scalar_batch<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Sse42ScalarBatch,
+                  &unpack_sse4_2_scalar_batch<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Sse42Exact, &unpack_sse4_2_exact<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Sse42Exact, &unpack_sse4_2_exact<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Sse42Exact, &unpack_sse4_2_exact<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Sse42Exact, &unpack_sse4_2_exact<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Sse42Exact, &unpack_sse4_2_exact<uint64_t>)
     ->ArgsProduct(kBitWidthsNumValues64);
 #endif
 
@@ -183,6 +252,69 @@ BENCHMARK_CAPTURE(BM_UnpackUint32, Avx2, &bpacking::unpack_avx2<uint32_t>,
                   "Avx2 not available")
     ->ArgsProduct(kBitWidthsNumValues32);
 BENCHMARK_CAPTURE(BM_UnpackUint64, Avx2, &bpacking::unpack_avx2<uint64_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Avx2Generated, &unpack_avx2_old<bool>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Avx2Generated, &unpack_avx2_old<uint8_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Avx2Generated, &unpack_avx2_old<uint16_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Avx2Generated, &unpack_avx2_old<uint32_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Avx2Generated, &unpack_avx2_old<uint64_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Avx2ScalarBatch, &unpack_avx2_scalar_batch<bool>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Avx2ScalarBatch, &unpack_avx2_scalar_batch<uint8_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Avx2ScalarBatch, &unpack_avx2_scalar_batch<uint16_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Avx2ScalarBatch, &unpack_avx2_scalar_batch<uint32_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Avx2ScalarBatch, &unpack_avx2_scalar_batch<uint64_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Avx2Exact, &unpack_avx2_exact<bool>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Avx2Exact, &unpack_avx2_exact<uint8_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Avx2Exact, &unpack_avx2_exact<uint16_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Avx2Exact, &unpack_avx2_exact<uint32_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
+                  "Avx2 not available")
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Avx2Exact, &unpack_avx2_exact<uint64_t>,
                   !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2),
                   "Avx2 not available")
     ->ArgsProduct(kBitWidthsNumValues64);
@@ -209,6 +341,51 @@ BENCHMARK_CAPTURE(BM_UnpackUint64, Avx512, &bpacking::unpack_avx512<uint64_t>,
                   !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
                   "Avx512 not available")
     ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Avx512ScalarBatch, &unpack_avx512_scalar_batch<bool>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Avx512ScalarBatch, &unpack_avx512_scalar_batch<uint8_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Avx512ScalarBatch,
+                  &unpack_avx512_scalar_batch<uint16_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Avx512ScalarBatch,
+                  &unpack_avx512_scalar_batch<uint32_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Avx512ScalarBatch,
+                  &unpack_avx512_scalar_batch<uint64_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, Avx512Exact, &unpack_avx512_exact<bool>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, Avx512Exact, &unpack_avx512_exact<uint8_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, Avx512Exact, &unpack_avx512_exact<uint16_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, Avx512Exact, &unpack_avx512_exact<uint32_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, Avx512Exact, &unpack_avx512_exact<uint64_t>,
+                  !CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512),
+                  "Avx512 not available")
+    ->ArgsProduct(kBitWidthsNumValues64);
 #endif
 
 #if defined(ARROW_HAVE_NEON)
@@ -221,6 +398,39 @@ BENCHMARK_CAPTURE(BM_UnpackUint16, Neon, &bpacking::unpack_neon<uint16_t>)
 BENCHMARK_CAPTURE(BM_UnpackUint32, Neon, &bpacking::unpack_neon<uint32_t>)
     ->ArgsProduct(kBitWidthsNumValues32);
 BENCHMARK_CAPTURE(BM_UnpackUint64, Neon, &bpacking::unpack_neon<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, NeonGenerated, &unpack_neon_old<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, NeonGenerated, &unpack_neon_old<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, NeonGenerated, &unpack_neon_old<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, NeonGenerated, &unpack_neon_old<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, NeonGenerated, &unpack_neon_old<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, NeonScalarBatch, &unpack_neon_scalar_batch<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, NeonScalarBatch, &unpack_neon_scalar_batch<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, NeonScalarBatch, &unpack_neon_scalar_batch<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, NeonScalarBatch, &unpack_neon_scalar_batch<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, NeonScalarBatch, &unpack_neon_scalar_batch<uint64_t>)
+    ->ArgsProduct(kBitWidthsNumValues64);
+
+BENCHMARK_CAPTURE(BM_UnpackBool, NeonExact, &unpack_neon_exact<bool>)
+    ->ArgsProduct(kBitWidthsNumValuesBool);
+BENCHMARK_CAPTURE(BM_UnpackUint8, NeonExact, &unpack_neon_exact<uint8_t>)
+    ->ArgsProduct(kBitWidthsNumValues8);
+BENCHMARK_CAPTURE(BM_UnpackUint16, NeonExact, &unpack_neon_exact<uint16_t>)
+    ->ArgsProduct(kBitWidthsNumValues16);
+BENCHMARK_CAPTURE(BM_UnpackUint32, NeonExact, &unpack_neon_exact<uint32_t>)
+    ->ArgsProduct(kBitWidthsNumValues32);
+BENCHMARK_CAPTURE(BM_UnpackUint64, NeonExact, &unpack_neon_exact<uint64_t>)
     ->ArgsProduct(kBitWidthsNumValues64);
 #endif
 

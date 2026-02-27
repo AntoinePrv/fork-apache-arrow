@@ -266,6 +266,21 @@ TEST_P(TestUnpack, Unpack8Scalar) { this->TestAll(&bpacking::unpack_scalar<uint8
 TEST_P(TestUnpack, Unpack16Scalar) { this->TestAll(&bpacking::unpack_scalar<uint16_t>); }
 TEST_P(TestUnpack, Unpack32Scalar) { this->TestAll(&bpacking::unpack_scalar<uint32_t>); }
 TEST_P(TestUnpack, Unpack64Scalar) { this->TestAll(&bpacking::unpack_scalar<uint64_t>); }
+TEST_P(TestUnpack, UnpackBoolScalarExact) {
+  this->TestAll(&bpacking::unpack_scalar_exact<bool>);
+}
+TEST_P(TestUnpack, Unpack8ScalarExact) {
+  this->TestAll(&bpacking::unpack_scalar_exact<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16ScalarExact) {
+  this->TestAll(&bpacking::unpack_scalar_exact<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32ScalarExact) {
+  this->TestAll(&bpacking::unpack_scalar_exact<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64ScalarExact) {
+  this->TestAll(&bpacking::unpack_scalar_exact<uint64_t>);
+}
 
 #if defined(ARROW_HAVE_SSE4_2)
 TEST_P(TestUnpack, UnpackBoolSse4_2) { this->TestAll(&bpacking::unpack_sse4_2<bool>); }
@@ -273,6 +288,51 @@ TEST_P(TestUnpack, Unpack8Sse4_2) { this->TestAll(&bpacking::unpack_sse4_2<uint8
 TEST_P(TestUnpack, Unpack16Sse4_2) { this->TestAll(&bpacking::unpack_sse4_2<uint16_t>); }
 TEST_P(TestUnpack, Unpack32Sse4_2) { this->TestAll(&bpacking::unpack_sse4_2<uint32_t>); }
 TEST_P(TestUnpack, Unpack64Sse4_2) { this->TestAll(&bpacking::unpack_sse4_2<uint64_t>); }
+TEST_P(TestUnpack, UnpackBoolSse4_2Old) {
+  this->TestAll(&bpacking::unpack_sse4_2_old<bool>);
+}
+TEST_P(TestUnpack, Unpack8Sse4_2Old) {
+  this->TestAll(&bpacking::unpack_sse4_2_old<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Sse4_2Old) {
+  this->TestAll(&bpacking::unpack_sse4_2_old<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Sse4_2Old) {
+  this->TestAll(&bpacking::unpack_sse4_2_old<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Sse4_2Old) {
+  this->TestAll(&bpacking::unpack_sse4_2_old<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolSse4_2ScalarBatch) {
+  this->TestAll(&bpacking::unpack_sse4_2_scalar_batch<bool>);
+}
+TEST_P(TestUnpack, Unpack8Sse4_2ScalarBatch) {
+  this->TestAll(&bpacking::unpack_sse4_2_scalar_batch<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Sse4_2ScalarBatch) {
+  this->TestAll(&bpacking::unpack_sse4_2_scalar_batch<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Sse4_2ScalarBatch) {
+  this->TestAll(&bpacking::unpack_sse4_2_scalar_batch<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Sse4_2ScalarBatch) {
+  this->TestAll(&bpacking::unpack_sse4_2_scalar_batch<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolSse4_2Exact) {
+  this->TestAll(&bpacking::unpack_sse4_2_exact<bool>);
+}
+TEST_P(TestUnpack, Unpack8Sse4_2Exact) {
+  this->TestAll(&bpacking::unpack_sse4_2_exact<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Sse4_2Exact) {
+  this->TestAll(&bpacking::unpack_sse4_2_exact<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Sse4_2Exact) {
+  this->TestAll(&bpacking::unpack_sse4_2_exact<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Sse4_2Exact) {
+  this->TestAll(&bpacking::unpack_sse4_2_exact<uint64_t>);
+}
 #endif
 
 #if defined(ARROW_HAVE_RUNTIME_AVX2)
@@ -305,6 +365,96 @@ TEST_P(TestUnpack, Unpack64Avx2) {
     GTEST_SKIP() << "Test requires AVX2";
   }
   this->TestAll(&bpacking::unpack_avx2<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolAvx2Old) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_old<bool>);
+}
+TEST_P(TestUnpack, Unpack8Avx2Old) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_old<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Avx2Old) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_old<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Avx2Old) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_old<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Avx2Old) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_old<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolAvx2ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_scalar_batch<bool>);
+}
+TEST_P(TestUnpack, Unpack8Avx2ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_scalar_batch<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Avx2ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_scalar_batch<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Avx2ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_scalar_batch<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Avx2ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_scalar_batch<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolAvx2Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_exact<bool>);
+}
+TEST_P(TestUnpack, Unpack8Avx2Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_exact<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Avx2Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_exact<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Avx2Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_exact<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Avx2Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX2)) {
+    GTEST_SKIP() << "Test requires AVX2";
+  }
+  this->TestAll(&bpacking::unpack_avx2_exact<uint64_t>);
 }
 #endif
 
@@ -339,6 +489,66 @@ TEST_P(TestUnpack, Unpack64Avx512) {
   }
   this->TestAll(&bpacking::unpack_avx512<uint64_t>);
 }
+TEST_P(TestUnpack, UnpackBoolAvx512ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_scalar_batch<bool>);
+}
+TEST_P(TestUnpack, Unpack8Avx512ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_scalar_batch<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Avx512ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_scalar_batch<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Avx512ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_scalar_batch<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Avx512ScalarBatch) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_scalar_batch<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolAvx512Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_exact<bool>);
+}
+TEST_P(TestUnpack, Unpack8Avx512Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_exact<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16Avx512Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_exact<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32Avx512Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_exact<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64Avx512Exact) {
+  if (!CpuInfo::GetInstance()->IsSupported(CpuInfo::AVX512)) {
+    GTEST_SKIP() << "Test requires AVX512";
+  }
+  this->TestAll(&bpacking::unpack_avx512_exact<uint64_t>);
+}
 #endif
 
 #if defined(ARROW_HAVE_NEON)
@@ -347,6 +557,47 @@ TEST_P(TestUnpack, Unpack8Neon) { this->TestAll(&bpacking::unpack_neon<uint8_t>)
 TEST_P(TestUnpack, Unpack16Neon) { this->TestAll(&bpacking::unpack_neon<uint16_t>); }
 TEST_P(TestUnpack, Unpack32Neon) { this->TestAll(&bpacking::unpack_neon<uint32_t>); }
 TEST_P(TestUnpack, Unpack64Neon) { this->TestAll(&bpacking::unpack_neon<uint64_t>); }
+TEST_P(TestUnpack, UnpackBoolNeonOld) { this->TestAll(&bpacking::unpack_neon_old<bool>); }
+TEST_P(TestUnpack, Unpack8NeonOld) { this->TestAll(&bpacking::unpack_neon_old<uint8_t>); }
+TEST_P(TestUnpack, Unpack16NeonOld) {
+  this->TestAll(&bpacking::unpack_neon_old<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32NeonOld) {
+  this->TestAll(&bpacking::unpack_neon_old<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64NeonOld) {
+  this->TestAll(&bpacking::unpack_neon_old<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolNeonScalarBatch) {
+  this->TestAll(&bpacking::unpack_neon_scalar_batch<bool>);
+}
+TEST_P(TestUnpack, Unpack8NeonScalarBatch) {
+  this->TestAll(&bpacking::unpack_neon_scalar_batch<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16NeonScalarBatch) {
+  this->TestAll(&bpacking::unpack_neon_scalar_batch<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32NeonScalarBatch) {
+  this->TestAll(&bpacking::unpack_neon_scalar_batch<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64NeonScalarBatch) {
+  this->TestAll(&bpacking::unpack_neon_scalar_batch<uint64_t>);
+}
+TEST_P(TestUnpack, UnpackBoolNeonExact) {
+  this->TestAll(&bpacking::unpack_neon_exact<bool>);
+}
+TEST_P(TestUnpack, Unpack8NeonExact) {
+  this->TestAll(&bpacking::unpack_neon_exact<uint8_t>);
+}
+TEST_P(TestUnpack, Unpack16NeonExact) {
+  this->TestAll(&bpacking::unpack_neon_exact<uint16_t>);
+}
+TEST_P(TestUnpack, Unpack32NeonExact) {
+  this->TestAll(&bpacking::unpack_neon_exact<uint32_t>);
+}
+TEST_P(TestUnpack, Unpack64NeonExact) {
+  this->TestAll(&bpacking::unpack_neon_exact<uint64_t>);
+}
 #endif
 
 TEST_P(TestUnpack, UnpackBool) { this->TestAll(&unpack<bool>); }
