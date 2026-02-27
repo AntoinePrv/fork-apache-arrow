@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#undef ARROW_USE_GLOG
 #ifdef ARROW_USE_GLOG
 
 #  include <signal.h>

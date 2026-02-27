@@ -124,7 +124,7 @@ else()
   set(PARQUET_STATIC_INSTALL_INTERFACE_LIBS)
 endif()
 
-set(PARQUET_TEST_LINK_LIBS ${ARROW_TEST_LINK_LIBS} thrift::thrift Boost::headers)
+set(PARQUET_TEST_LINK_LIBS ${ARROW_TEST_LINK_LIBS} thrift::thrift)
 if(APPLE)
   list(APPEND PARQUET_TEST_LINK_LIBS ${CMAKE_DL_LIBS})
 elseif(NOT MSVC)
@@ -157,7 +157,6 @@ set(PARQUET_SRCS
     arrow/reader_internal.cc
     arrow/schema.cc
     arrow/schema_internal.cc
-    arrow/variant_internal.cc
     arrow/writer.cc
     bloom_filter.cc
     bloom_filter_reader.cc

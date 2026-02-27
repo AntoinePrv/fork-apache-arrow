@@ -38,6 +38,7 @@
 #include <azure/storage/files/datalake.hpp>
 
 #include "arrow/buffer.h"
+#include "arrow/config.h"
 #include "arrow/filesystem/path_util.h"
 #include "arrow/filesystem/util_internal.h"
 #include "arrow/io/util_internal.h"
@@ -303,6 +304,10 @@ Status ExceptionToStatus(const Azure::Core::RequestFailedException& exception,
   return Status::IOError(std::forward<PrefixArgs>(prefix_args)..., " Azure Error: [",
                          exception.ErrorCode, "] ", exception.what());
 }
+
+std::string BuildApplicationId() {
+  return "azpartner-arrow/" + GetBuildInfo().version_string;
+}
 }  // namespace
 
 std::string AzureOptions::AccountBlobUrl(const std::string& account_name) const {
@@ -386,9 +391,12 @@ Result<std::unique_ptr<Blobs::BlobServiceClient>> AzureOptions::MakeBlobServiceC
     return Status::Invalid("AzureOptions::blob_storage_scheme must be http or https: ",
                            blob_storage_scheme);
   }
+  Blobs::BlobClientOptions client_options;
+  client_options.Telemetry.ApplicationId = BuildApplicationId();
   switch (credential_kind_) {
     case CredentialKind::kAnonymous:
-      return std::make_unique<Blobs::BlobServiceClient>(AccountBlobUrl(account_name));
+      return std::make_unique<Blobs::BlobServiceClient>(AccountBlobUrl(account_name),
+                                                        client_options);
     case CredentialKind::kDefault:
       if (!token_credential_) {
         token_credential_ = std::make_shared<Azure::Identity::DefaultAzureCredential>();
@@ -399,14 +407,14 @@ Result<std::unique_ptr<Blobs::BlobServiceClient>> AzureOptions::MakeBlobServiceC
     case CredentialKind::kCLI:
     case CredentialKind::kWorkloadIdentity:
     case CredentialKind::kEnvironment:
-      return std::make_unique<Blobs::BlobServiceClient>(AccountBlobUrl(account_name),
-                                                        token_credential_);
+      return std::make_unique<Blobs::BlobServiceClient>(
+          AccountBlobUrl(account_name), token_credential_, client_options);
     case CredentialKind::kStorageSharedKey:
-      return std::make_unique<Blobs::BlobServiceClient>(AccountBlobUrl(account_name),
-                                                        storage_shared_key_credential_);
+      return std::make_unique<Blobs::BlobServiceClient>(
+          AccountBlobUrl(account_name), storage_shared_key_credential_, client_options);
     case CredentialKind::kSASToken:
-      return std::make_unique<Blobs::BlobServiceClient>(AccountBlobUrl(account_name) +
-                                                        sas_token_);
+      return std::make_unique<Blobs::BlobServiceClient>(
+          AccountBlobUrl(account_name) + sas_token_, client_options);
   }
   return Status::Invalid("AzureOptions doesn't contain a valid auth configuration");
 }
@@ -420,10 +428,12 @@ AzureOptions::MakeDataLakeServiceClient() const {
     return Status::Invalid("AzureOptions::dfs_storage_scheme must be http or https: ",
                            dfs_storage_scheme);
   }
+  DataLake::DataLakeClientOptions client_options;
+  client_options.Telemetry.ApplicationId = BuildApplicationId();
   switch (credential_kind_) {
     case CredentialKind::kAnonymous:
       return std::make_unique<DataLake::DataLakeServiceClient>(
-          AccountDfsUrl(account_name));
+          AccountDfsUrl(account_name), client_options);
     case CredentialKind::kDefault:
       if (!token_credential_) {
         token_credential_ = std::make_shared<Azure::Identity::DefaultAzureCredential>();
@@ -435,13 +445,13 @@ AzureOptions::MakeDataLakeServiceClient() const {
     case CredentialKind::kWorkloadIdentity:
     case CredentialKind::kEnvironment:
       return std::make_unique<DataLake::DataLakeServiceClient>(
-          AccountDfsUrl(account_name), token_credential_);
+          AccountDfsUrl(account_name), token_credential_, client_options);
     case CredentialKind::kStorageSharedKey:
       return std::make_unique<DataLake::DataLakeServiceClient>(
-          AccountDfsUrl(account_name), storage_shared_key_credential_);
+          AccountDfsUrl(account_name), storage_shared_key_credential_, client_options);
     case CredentialKind::kSASToken:
       return std::make_unique<DataLake::DataLakeServiceClient>(
-          AccountBlobUrl(account_name) + sas_token_);
+          AccountBlobUrl(account_name) + sas_token_, client_options);
   }
   return Status::Invalid("AzureOptions doesn't contain a valid auth configuration");
 }
@@ -996,7 +1006,7 @@ void SkipStartingEmptyPages(DataLake::ListPathsPagedResponse& paged_response) {
 /// Writes will be buffered up to this size (in bytes) before actually uploading them.
 static constexpr int64_t kBlockUploadSizeBytes = 10 * 1024 * 1024;
 /// The maximum size of a block in Azure Blob (as per docs).
-static constexpr int64_t kMaxBlockSizeBytes = 4UL * 1024 * 1024 * 1024;
+static constexpr int64_t kMaxBlockSizeBytes = 4LL * 1024 * 1024 * 1024;
 
 /// This output stream, similar to other arrow OutputStreams, is not thread-safe.
 class ObjectAppendStream final : public io::OutputStream {
@@ -1388,7 +1398,7 @@ Result<HNSSupport> CheckIfHierarchicalNamespaceIsEnabled(
     // without hierarchical namespace enabled.
     directory_client.GetAccessControlList();
     return HNSSupport::kEnabled;
-  } catch (std::out_of_range& exception) {
+  } catch (const std::out_of_range&) {
     // Azurite issue detected.
     DCHECK(IsDfsEmulator(options));
     return HNSSupport::kDisabled;
@@ -2532,7 +2542,7 @@ class AzureFileSystem::Impl {
           try {
             auto delete_result = deferred_response.GetResponse();
             success = delete_result.Value.Deleted;
-          } catch (const Core::RequestFailedException& exception) {
+          } catch (const Core::RequestFailedException&) {
             success = false;
           }
           if (!success) {
@@ -3253,6 +3263,8 @@ class AzureFileSystem::Impl {
 
 std::atomic<LeaseGuard::SteadyClock::time_point> LeaseGuard::latest_known_expiry_time_ =
     SteadyClock::time_point{SteadyClock::duration::zero()};
+
+AzureFileSystem::~AzureFileSystem() = default;
 
 AzureFileSystem::AzureFileSystem(std::unique_ptr<Impl>&& impl)
     : FileSystem(impl->io_context()), impl_(std::move(impl)) {

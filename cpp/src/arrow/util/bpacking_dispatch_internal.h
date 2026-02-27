@@ -28,7 +28,7 @@
 #include "arrow/util/macros.h"
 #include "arrow/util/ubsan.h"
 
-namespace arrow::internal {
+namespace arrow::internal::bpacking {
 
 /// Unpack a zero bit packed array.
 template <typename Uint>
@@ -98,6 +98,8 @@ using SpreadBufferUint = std::conditional_t<
 /// stop if it finds a byte aligned value start.
 template <int kPackedBitWidth, bool kIsProlog, typename Uint>
 int unpack_exact(const uint8_t* in, Uint* out, int batch_size, int bit_offset) {
+  static_assert(kPackedBitWidth > 0);
+
   // For the epilog we adapt the max spread since better alignment give shorter spreads
   ARROW_DCHECK(kIsProlog || bit_offset == 0);
   ARROW_DCHECK(bit_offset >= 0 && bit_offset < 8);
@@ -121,6 +123,7 @@ int unpack_exact(const uint8_t* in, Uint* out, int batch_size, int bit_offset) {
   while ((start_bit < start_bit_term) && (!kIsProlog || (start_bit % 8 != 0))) {
     const int start_byte = start_bit / 8;
     const int spread_bytes = ((start_bit + kPackedBitWidth - 1) / 8) - start_byte + 1;
+    ARROW_DCHECK_LE(spread_bytes, kMaxSpreadBytes);
     ARROW_COMPILER_ASSUME(spread_bytes <= kMaxSpreadBytes);
 
     // Reading the bytes for the current value.
@@ -168,6 +171,7 @@ int unpack_exact(const uint8_t* in, Uint* out, int batch_size, int bit_offset) {
 ///                  byte alignment).
 /// @tparam UnpackedUInt The type in which we unpack the values.
 /// @param batch_size The number of values to unpack.
+/// @param bit_offset The bit offset of the first value in the first input byte.
 /// @param max_read_bytes The maximum size of the input byte array that can be read.
 ///                       This is used to safely overread.
 ///                       Negative value to deduce from batch_size.
@@ -179,7 +183,7 @@ void unpack_width(const uint8_t* in, UnpackedUInt* out, int batch_size, int bit_
     // Easy case to handle, simply setting memory to zero.
     return unpack_null(in, out, batch_size);
   } else {
-    // Number of size to read according to batch_size.
+    // Number of bytes to read according to batch_size.
     const int bytes_batch = static_cast<int>(
         bit_util::BytesForBits(batch_size * kPackedBitWidth + bit_offset));
     // If specified, max_read_bytes must be greater that the bytes needed to extract the
@@ -217,7 +221,7 @@ void unpack_width(const uint8_t* in, UnpackedUInt* out, int batch_size, int bit_
           batch_size -= kValuesUnpacked;
         }
 
-        // Performance check aking sure we ran the kernel loop as much as possible:
+        // Performance check making sure we ran the kernel loop as much as possible:
         // Either we ran out because we could not pack enough values, or because we would
         // overread.
         ARROW_DCHECK((batch_size < kValuesUnpacked) || (in_end - in) < kBytesRead);
@@ -629,4 +633,4 @@ static void unpack_jump(const uint8_t* in, UnpackedUint* out, const UnpackOption
   }
   ARROW_DCHECK(false) << "Unsupported num_bits " << opt.bit_width;
 }
-}  // namespace arrow::internal
+}  // namespace arrow::internal::bpacking

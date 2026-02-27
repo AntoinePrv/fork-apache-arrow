@@ -19,8 +19,6 @@
 #  define UNPACK_PLATFORM unpack_neon
 #elif defined(ARROW_HAVE_SSE4_2)
 #  define UNPACK_PLATFORM unpack_sse4_2
-#else
-#  define UNPACK_PLATFORM unpack_128
 #endif
 
 #if defined(UNPACK_PLATFORM)
@@ -29,7 +27,7 @@
 #  include "arrow/util/bpacking_simd_internal.h"
 #  include "arrow/util/bpacking_simd_kernel_internal.h"
 
-namespace arrow::internal {
+namespace arrow::internal::bpacking {
 
 template <typename UnpackedUint, int kPackedBitSize>
 using Simd128Kernel = Kernel<UnpackedUint, kPackedBitSize, 128>;
@@ -45,6 +43,7 @@ template void UNPACK_PLATFORM<uint16_t>(const uint8_t*, uint16_t*, const UnpackO
 template void UNPACK_PLATFORM<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
 template void UNPACK_PLATFORM<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
 
-}  // namespace arrow::internal
+}  // namespace arrow::internal::bpacking
 
-#endif
+#  undef UNPACK_PLATFORM
+#endif  // UNPACK_PLATFORM
