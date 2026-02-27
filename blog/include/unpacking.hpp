@@ -6,4 +6,3 @@
 #include <vector>
 
 #include "arrow/util/bit_util.h"
-

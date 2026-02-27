@@ -35,59 +35,61 @@ Int LoadInt(const uint8_t* in) {
   return bit_util::FromLittleEndian(util::SafeLoadAs<Int>(in));
 }
 
-template<typename Uint, int kBitWidth>
+template <typename Uint, int kBitWidth>
 struct ScalarUnpackerForWidth;
-template<int kBitWidth>
+template <int kBitWidth>
 struct ScalarUnpackerForWidth<bool, kBitWidth> {
-
-  static constexpr int kValuesUnpacked = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
-  static constexpr int kBytesRead = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
+  static constexpr int kValuesUnpacked =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
+  static constexpr int kBytesRead =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
 
   static const uint8_t* unpack(const uint8_t* in, bool* out) {
     uint32_t buffer[kValuesUnpacked] = {};
     in = ScalarUnpackerForWidth<uint32_t, kBitWidth>::unpack(in, buffer);
-    for(int k = 0; k< kValuesUnpacked; ++k) {
+    for (int k = 0; k < kValuesUnpacked; ++k) {
       out[k] = static_cast<bool>(buffer[k]);
     }
     return in;
   }
 };
 
-template<int kBitWidth>
+template <int kBitWidth>
 struct ScalarUnpackerForWidth<uint8_t, kBitWidth> {
-
-  static constexpr int kValuesUnpacked = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
-  static constexpr int kBytesRead = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
+  static constexpr int kValuesUnpacked =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
+  static constexpr int kBytesRead =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
 
   static const uint8_t* unpack(const uint8_t* in, uint8_t* out) {
     uint32_t buffer[kValuesUnpacked] = {};
     in = ScalarUnpackerForWidth<uint32_t, kBitWidth>::unpack(in, buffer);
-    for(int k = 0; k< kValuesUnpacked; ++k) {
+    for (int k = 0; k < kValuesUnpacked; ++k) {
       out[k] = static_cast<uint8_t>(buffer[k]);
     }
     return in;
   }
 };
 
-template<int kBitWidth>
+template <int kBitWidth>
 struct ScalarUnpackerForWidth<uint16_t, kBitWidth> {
-
-  static constexpr int kValuesUnpacked = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
-  static constexpr int kBytesRead = ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
+  static constexpr int kValuesUnpacked =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kValuesUnpacked;
+  static constexpr int kBytesRead =
+      ScalarUnpackerForWidth<uint32_t, kBitWidth>::kBytesRead;
 
   static const uint8_t* unpack(const uint8_t* in, uint16_t* out) {
     uint32_t buffer[kValuesUnpacked] = {};
     in = ScalarUnpackerForWidth<uint32_t, kBitWidth>::unpack(in, buffer);
-    for(int k = 0; k< kValuesUnpacked; ++k) {
+    for (int k = 0; k < kValuesUnpacked; ++k) {
       out[k] = static_cast<uint16_t>(buffer[k]);
     }
     return in;
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 1> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 4;
 
@@ -95,7 +97,7 @@ struct ScalarUnpackerForWidth<uint32_t, 1> {
     constexpr uint32_t mask = ((uint32_t{1} << 1) - uint32_t{1});
 
     const auto w0 = LoadInt<uint32_t>(in + 0 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 1) & mask;
     out[2] = (w0 >> 2) & mask;
     out[3] = (w0 >> 3) & mask;
@@ -132,9 +134,8 @@ struct ScalarUnpackerForWidth<uint32_t, 1> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 2> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 8;
 
@@ -143,7 +144,7 @@ struct ScalarUnpackerForWidth<uint32_t, 2> {
 
     const auto w0 = LoadInt<uint32_t>(in + 0 * 4);
     const auto w1 = LoadInt<uint32_t>(in + 1 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 2) & mask;
     out[2] = (w0 >> 4) & mask;
     out[3] = (w0 >> 6) & mask;
@@ -159,7 +160,7 @@ struct ScalarUnpackerForWidth<uint32_t, 2> {
     out[13] = (w0 >> 26) & mask;
     out[14] = (w0 >> 28) & mask;
     out[15] = w0 >> 30;
-    out[16] = (w1) & mask;
+    out[16] = (w1)&mask;
     out[17] = (w1 >> 2) & mask;
     out[18] = (w1 >> 4) & mask;
     out[19] = (w1 >> 6) & mask;
@@ -180,9 +181,8 @@ struct ScalarUnpackerForWidth<uint32_t, 2> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 3> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 12;
 
@@ -192,7 +192,7 @@ struct ScalarUnpackerForWidth<uint32_t, 3> {
     const auto w0 = LoadInt<uint32_t>(in + 0 * 4);
     const auto w1 = LoadInt<uint32_t>(in + 1 * 4);
     const auto w2 = LoadInt<uint32_t>(in + 2 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 3) & mask;
     out[2] = (w0 >> 6) & mask;
     out[3] = (w0 >> 9) & mask;
@@ -229,9 +229,8 @@ struct ScalarUnpackerForWidth<uint32_t, 3> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 4> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 16;
 
@@ -242,7 +241,7 @@ struct ScalarUnpackerForWidth<uint32_t, 4> {
     const auto w1 = LoadInt<uint32_t>(in + 1 * 4);
     const auto w2 = LoadInt<uint32_t>(in + 2 * 4);
     const auto w3 = LoadInt<uint32_t>(in + 3 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 4) & mask;
     out[2] = (w0 >> 8) & mask;
     out[3] = (w0 >> 12) & mask;
@@ -250,7 +249,7 @@ struct ScalarUnpackerForWidth<uint32_t, 4> {
     out[5] = (w0 >> 20) & mask;
     out[6] = (w0 >> 24) & mask;
     out[7] = w0 >> 28;
-    out[8] = (w1) & mask;
+    out[8] = (w1)&mask;
     out[9] = (w1 >> 4) & mask;
     out[10] = (w1 >> 8) & mask;
     out[11] = (w1 >> 12) & mask;
@@ -258,7 +257,7 @@ struct ScalarUnpackerForWidth<uint32_t, 4> {
     out[13] = (w1 >> 20) & mask;
     out[14] = (w1 >> 24) & mask;
     out[15] = w1 >> 28;
-    out[16] = (w2) & mask;
+    out[16] = (w2)&mask;
     out[17] = (w2 >> 4) & mask;
     out[18] = (w2 >> 8) & mask;
     out[19] = (w2 >> 12) & mask;
@@ -266,7 +265,7 @@ struct ScalarUnpackerForWidth<uint32_t, 4> {
     out[21] = (w2 >> 20) & mask;
     out[22] = (w2 >> 24) & mask;
     out[23] = w2 >> 28;
-    out[24] = (w3) & mask;
+    out[24] = (w3)&mask;
     out[25] = (w3 >> 4) & mask;
     out[26] = (w3 >> 8) & mask;
     out[27] = (w3 >> 12) & mask;
@@ -279,9 +278,8 @@ struct ScalarUnpackerForWidth<uint32_t, 4> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 5> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 20;
 
@@ -293,7 +291,7 @@ struct ScalarUnpackerForWidth<uint32_t, 5> {
     const auto w2 = LoadInt<uint32_t>(in + 2 * 4);
     const auto w3 = LoadInt<uint32_t>(in + 3 * 4);
     const auto w4 = LoadInt<uint32_t>(in + 4 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 5) & mask;
     out[2] = (w0 >> 10) & mask;
     out[3] = (w0 >> 15) & mask;
@@ -330,9 +328,8 @@ struct ScalarUnpackerForWidth<uint32_t, 5> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 6> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 24;
 
@@ -345,7 +342,7 @@ struct ScalarUnpackerForWidth<uint32_t, 6> {
     const auto w3 = LoadInt<uint32_t>(in + 3 * 4);
     const auto w4 = LoadInt<uint32_t>(in + 4 * 4);
     const auto w5 = LoadInt<uint32_t>(in + 5 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 6) & mask;
     out[2] = (w0 >> 12) & mask;
     out[3] = (w0 >> 18) & mask;
@@ -361,7 +358,7 @@ struct ScalarUnpackerForWidth<uint32_t, 6> {
     out[13] = (w2 >> 14) & mask;
     out[14] = (w2 >> 20) & mask;
     out[15] = w2 >> 26;
-    out[16] = (w3) & mask;
+    out[16] = (w3)&mask;
     out[17] = (w3 >> 6) & mask;
     out[18] = (w3 >> 12) & mask;
     out[19] = (w3 >> 18) & mask;
@@ -382,9 +379,8 @@ struct ScalarUnpackerForWidth<uint32_t, 6> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 7> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 28;
 
@@ -398,7 +394,7 @@ struct ScalarUnpackerForWidth<uint32_t, 7> {
     const auto w4 = LoadInt<uint32_t>(in + 4 * 4);
     const auto w5 = LoadInt<uint32_t>(in + 5 * 4);
     const auto w6 = LoadInt<uint32_t>(in + 6 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 7) & mask;
     out[2] = (w0 >> 14) & mask;
     out[3] = (w0 >> 21) & mask;
@@ -435,9 +431,8 @@ struct ScalarUnpackerForWidth<uint32_t, 7> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 8> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 32;
 
@@ -452,35 +447,35 @@ struct ScalarUnpackerForWidth<uint32_t, 8> {
     const auto w5 = LoadInt<uint32_t>(in + 5 * 4);
     const auto w6 = LoadInt<uint32_t>(in + 6 * 4);
     const auto w7 = LoadInt<uint32_t>(in + 7 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 8) & mask;
     out[2] = (w0 >> 16) & mask;
     out[3] = w0 >> 24;
-    out[4] = (w1) & mask;
+    out[4] = (w1)&mask;
     out[5] = (w1 >> 8) & mask;
     out[6] = (w1 >> 16) & mask;
     out[7] = w1 >> 24;
-    out[8] = (w2) & mask;
+    out[8] = (w2)&mask;
     out[9] = (w2 >> 8) & mask;
     out[10] = (w2 >> 16) & mask;
     out[11] = w2 >> 24;
-    out[12] = (w3) & mask;
+    out[12] = (w3)&mask;
     out[13] = (w3 >> 8) & mask;
     out[14] = (w3 >> 16) & mask;
     out[15] = w3 >> 24;
-    out[16] = (w4) & mask;
+    out[16] = (w4)&mask;
     out[17] = (w4 >> 8) & mask;
     out[18] = (w4 >> 16) & mask;
     out[19] = w4 >> 24;
-    out[20] = (w5) & mask;
+    out[20] = (w5)&mask;
     out[21] = (w5 >> 8) & mask;
     out[22] = (w5 >> 16) & mask;
     out[23] = w5 >> 24;
-    out[24] = (w6) & mask;
+    out[24] = (w6)&mask;
     out[25] = (w6 >> 8) & mask;
     out[26] = (w6 >> 16) & mask;
     out[27] = w6 >> 24;
-    out[28] = (w7) & mask;
+    out[28] = (w7)&mask;
     out[29] = (w7 >> 8) & mask;
     out[30] = (w7 >> 16) & mask;
     out[31] = w7 >> 24;
@@ -489,9 +484,8 @@ struct ScalarUnpackerForWidth<uint32_t, 8> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 9> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 36;
 
@@ -507,7 +501,7 @@ struct ScalarUnpackerForWidth<uint32_t, 9> {
     const auto w6 = LoadInt<uint32_t>(in + 6 * 4);
     const auto w7 = LoadInt<uint32_t>(in + 7 * 4);
     const auto w8 = LoadInt<uint32_t>(in + 8 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 9) & mask;
     out[2] = (w0 >> 18) & mask;
     out[3] = ((w0 >> 27) | (w1 << 5)) & mask;
@@ -544,9 +538,8 @@ struct ScalarUnpackerForWidth<uint32_t, 9> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 10> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 40;
 
@@ -563,7 +556,7 @@ struct ScalarUnpackerForWidth<uint32_t, 10> {
     const auto w7 = LoadInt<uint32_t>(in + 7 * 4);
     const auto w8 = LoadInt<uint32_t>(in + 8 * 4);
     const auto w9 = LoadInt<uint32_t>(in + 9 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 10) & mask;
     out[2] = (w0 >> 20) & mask;
     out[3] = ((w0 >> 30) | (w1 << 2)) & mask;
@@ -579,7 +572,7 @@ struct ScalarUnpackerForWidth<uint32_t, 10> {
     out[13] = (w4 >> 2) & mask;
     out[14] = (w4 >> 12) & mask;
     out[15] = w4 >> 22;
-    out[16] = (w5) & mask;
+    out[16] = (w5)&mask;
     out[17] = (w5 >> 10) & mask;
     out[18] = (w5 >> 20) & mask;
     out[19] = ((w5 >> 30) | (w6 << 2)) & mask;
@@ -600,9 +593,8 @@ struct ScalarUnpackerForWidth<uint32_t, 10> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 11> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 44;
 
@@ -620,7 +612,7 @@ struct ScalarUnpackerForWidth<uint32_t, 11> {
     const auto w8 = LoadInt<uint32_t>(in + 8 * 4);
     const auto w9 = LoadInt<uint32_t>(in + 9 * 4);
     const auto w10 = LoadInt<uint32_t>(in + 10 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 11) & mask;
     out[2] = ((w0 >> 22) | (w1 << 10)) & mask;
     out[3] = (w1 >> 1) & mask;
@@ -657,9 +649,8 @@ struct ScalarUnpackerForWidth<uint32_t, 11> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 12> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 48;
 
@@ -678,7 +669,7 @@ struct ScalarUnpackerForWidth<uint32_t, 12> {
     const auto w9 = LoadInt<uint32_t>(in + 9 * 4);
     const auto w10 = LoadInt<uint32_t>(in + 10 * 4);
     const auto w11 = LoadInt<uint32_t>(in + 11 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 12) & mask;
     out[2] = ((w0 >> 24) | (w1 << 8)) & mask;
     out[3] = (w1 >> 4) & mask;
@@ -686,7 +677,7 @@ struct ScalarUnpackerForWidth<uint32_t, 12> {
     out[5] = ((w1 >> 28) | (w2 << 4)) & mask;
     out[6] = (w2 >> 8) & mask;
     out[7] = w2 >> 20;
-    out[8] = (w3) & mask;
+    out[8] = (w3)&mask;
     out[9] = (w3 >> 12) & mask;
     out[10] = ((w3 >> 24) | (w4 << 8)) & mask;
     out[11] = (w4 >> 4) & mask;
@@ -694,7 +685,7 @@ struct ScalarUnpackerForWidth<uint32_t, 12> {
     out[13] = ((w4 >> 28) | (w5 << 4)) & mask;
     out[14] = (w5 >> 8) & mask;
     out[15] = w5 >> 20;
-    out[16] = (w6) & mask;
+    out[16] = (w6)&mask;
     out[17] = (w6 >> 12) & mask;
     out[18] = ((w6 >> 24) | (w7 << 8)) & mask;
     out[19] = (w7 >> 4) & mask;
@@ -702,7 +693,7 @@ struct ScalarUnpackerForWidth<uint32_t, 12> {
     out[21] = ((w7 >> 28) | (w8 << 4)) & mask;
     out[22] = (w8 >> 8) & mask;
     out[23] = w8 >> 20;
-    out[24] = (w9) & mask;
+    out[24] = (w9)&mask;
     out[25] = (w9 >> 12) & mask;
     out[26] = ((w9 >> 24) | (w10 << 8)) & mask;
     out[27] = (w10 >> 4) & mask;
@@ -715,9 +706,8 @@ struct ScalarUnpackerForWidth<uint32_t, 12> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 13> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 52;
 
@@ -737,7 +727,7 @@ struct ScalarUnpackerForWidth<uint32_t, 13> {
     const auto w10 = LoadInt<uint32_t>(in + 10 * 4);
     const auto w11 = LoadInt<uint32_t>(in + 11 * 4);
     const auto w12 = LoadInt<uint32_t>(in + 12 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 13) & mask;
     out[2] = ((w0 >> 26) | (w1 << 6)) & mask;
     out[3] = (w1 >> 7) & mask;
@@ -774,9 +764,8 @@ struct ScalarUnpackerForWidth<uint32_t, 13> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 14> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 56;
 
@@ -797,7 +786,7 @@ struct ScalarUnpackerForWidth<uint32_t, 14> {
     const auto w11 = LoadInt<uint32_t>(in + 11 * 4);
     const auto w12 = LoadInt<uint32_t>(in + 12 * 4);
     const auto w13 = LoadInt<uint32_t>(in + 13 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 14) & mask;
     out[2] = ((w0 >> 28) | (w1 << 4)) & mask;
     out[3] = (w1 >> 10) & mask;
@@ -813,7 +802,7 @@ struct ScalarUnpackerForWidth<uint32_t, 14> {
     out[13] = ((w5 >> 22) | (w6 << 10)) & mask;
     out[14] = (w6 >> 4) & mask;
     out[15] = w6 >> 18;
-    out[16] = (w7) & mask;
+    out[16] = (w7)&mask;
     out[17] = (w7 >> 14) & mask;
     out[18] = ((w7 >> 28) | (w8 << 4)) & mask;
     out[19] = (w8 >> 10) & mask;
@@ -834,9 +823,8 @@ struct ScalarUnpackerForWidth<uint32_t, 14> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 15> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 60;
 
@@ -858,7 +846,7 @@ struct ScalarUnpackerForWidth<uint32_t, 15> {
     const auto w12 = LoadInt<uint32_t>(in + 12 * 4);
     const auto w13 = LoadInt<uint32_t>(in + 13 * 4);
     const auto w14 = LoadInt<uint32_t>(in + 14 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 15) & mask;
     out[2] = ((w0 >> 30) | (w1 << 2)) & mask;
     out[3] = (w1 >> 13) & mask;
@@ -895,9 +883,8 @@ struct ScalarUnpackerForWidth<uint32_t, 15> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 16> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 64;
 
@@ -920,46 +907,45 @@ struct ScalarUnpackerForWidth<uint32_t, 16> {
     const auto w13 = LoadInt<uint32_t>(in + 13 * 4);
     const auto w14 = LoadInt<uint32_t>(in + 14 * 4);
     const auto w15 = LoadInt<uint32_t>(in + 15 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = w0 >> 16;
-    out[2] = (w1) & mask;
+    out[2] = (w1)&mask;
     out[3] = w1 >> 16;
-    out[4] = (w2) & mask;
+    out[4] = (w2)&mask;
     out[5] = w2 >> 16;
-    out[6] = (w3) & mask;
+    out[6] = (w3)&mask;
     out[7] = w3 >> 16;
-    out[8] = (w4) & mask;
+    out[8] = (w4)&mask;
     out[9] = w4 >> 16;
-    out[10] = (w5) & mask;
+    out[10] = (w5)&mask;
     out[11] = w5 >> 16;
-    out[12] = (w6) & mask;
+    out[12] = (w6)&mask;
     out[13] = w6 >> 16;
-    out[14] = (w7) & mask;
+    out[14] = (w7)&mask;
     out[15] = w7 >> 16;
-    out[16] = (w8) & mask;
+    out[16] = (w8)&mask;
     out[17] = w8 >> 16;
-    out[18] = (w9) & mask;
+    out[18] = (w9)&mask;
     out[19] = w9 >> 16;
-    out[20] = (w10) & mask;
+    out[20] = (w10)&mask;
     out[21] = w10 >> 16;
-    out[22] = (w11) & mask;
+    out[22] = (w11)&mask;
     out[23] = w11 >> 16;
-    out[24] = (w12) & mask;
+    out[24] = (w12)&mask;
     out[25] = w12 >> 16;
-    out[26] = (w13) & mask;
+    out[26] = (w13)&mask;
     out[27] = w13 >> 16;
-    out[28] = (w14) & mask;
+    out[28] = (w14)&mask;
     out[29] = w14 >> 16;
-    out[30] = (w15) & mask;
+    out[30] = (w15)&mask;
     out[31] = w15 >> 16;
 
     return in + (16 * 4);
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 17> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 68;
 
@@ -983,7 +969,7 @@ struct ScalarUnpackerForWidth<uint32_t, 17> {
     const auto w14 = LoadInt<uint32_t>(in + 14 * 4);
     const auto w15 = LoadInt<uint32_t>(in + 15 * 4);
     const auto w16 = LoadInt<uint32_t>(in + 16 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 17) | (w1 << 15)) & mask;
     out[2] = (w1 >> 2) & mask;
     out[3] = ((w1 >> 19) | (w2 << 13)) & mask;
@@ -1020,9 +1006,8 @@ struct ScalarUnpackerForWidth<uint32_t, 17> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 18> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 72;
 
@@ -1047,7 +1032,7 @@ struct ScalarUnpackerForWidth<uint32_t, 18> {
     const auto w15 = LoadInt<uint32_t>(in + 15 * 4);
     const auto w16 = LoadInt<uint32_t>(in + 16 * 4);
     const auto w17 = LoadInt<uint32_t>(in + 17 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 18) | (w1 << 14)) & mask;
     out[2] = (w1 >> 4) & mask;
     out[3] = ((w1 >> 22) | (w2 << 10)) & mask;
@@ -1063,7 +1048,7 @@ struct ScalarUnpackerForWidth<uint32_t, 18> {
     out[13] = (w7 >> 10) & mask;
     out[14] = ((w7 >> 28) | (w8 << 4)) & mask;
     out[15] = w8 >> 14;
-    out[16] = (w9) & mask;
+    out[16] = (w9)&mask;
     out[17] = ((w9 >> 18) | (w10 << 14)) & mask;
     out[18] = (w10 >> 4) & mask;
     out[19] = ((w10 >> 22) | (w11 << 10)) & mask;
@@ -1084,9 +1069,8 @@ struct ScalarUnpackerForWidth<uint32_t, 18> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 19> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 76;
 
@@ -1112,7 +1096,7 @@ struct ScalarUnpackerForWidth<uint32_t, 19> {
     const auto w16 = LoadInt<uint32_t>(in + 16 * 4);
     const auto w17 = LoadInt<uint32_t>(in + 17 * 4);
     const auto w18 = LoadInt<uint32_t>(in + 18 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 19) | (w1 << 13)) & mask;
     out[2] = (w1 >> 6) & mask;
     out[3] = ((w1 >> 25) | (w2 << 7)) & mask;
@@ -1149,9 +1133,8 @@ struct ScalarUnpackerForWidth<uint32_t, 19> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 20> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 80;
 
@@ -1178,7 +1161,7 @@ struct ScalarUnpackerForWidth<uint32_t, 20> {
     const auto w17 = LoadInt<uint32_t>(in + 17 * 4);
     const auto w18 = LoadInt<uint32_t>(in + 18 * 4);
     const auto w19 = LoadInt<uint32_t>(in + 19 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 20) | (w1 << 12)) & mask;
     out[2] = (w1 >> 8) & mask;
     out[3] = ((w1 >> 28) | (w2 << 4)) & mask;
@@ -1186,7 +1169,7 @@ struct ScalarUnpackerForWidth<uint32_t, 20> {
     out[5] = (w3 >> 4) & mask;
     out[6] = ((w3 >> 24) | (w4 << 8)) & mask;
     out[7] = w4 >> 12;
-    out[8] = (w5) & mask;
+    out[8] = (w5)&mask;
     out[9] = ((w5 >> 20) | (w6 << 12)) & mask;
     out[10] = (w6 >> 8) & mask;
     out[11] = ((w6 >> 28) | (w7 << 4)) & mask;
@@ -1194,7 +1177,7 @@ struct ScalarUnpackerForWidth<uint32_t, 20> {
     out[13] = (w8 >> 4) & mask;
     out[14] = ((w8 >> 24) | (w9 << 8)) & mask;
     out[15] = w9 >> 12;
-    out[16] = (w10) & mask;
+    out[16] = (w10)&mask;
     out[17] = ((w10 >> 20) | (w11 << 12)) & mask;
     out[18] = (w11 >> 8) & mask;
     out[19] = ((w11 >> 28) | (w12 << 4)) & mask;
@@ -1202,7 +1185,7 @@ struct ScalarUnpackerForWidth<uint32_t, 20> {
     out[21] = (w13 >> 4) & mask;
     out[22] = ((w13 >> 24) | (w14 << 8)) & mask;
     out[23] = w14 >> 12;
-    out[24] = (w15) & mask;
+    out[24] = (w15)&mask;
     out[25] = ((w15 >> 20) | (w16 << 12)) & mask;
     out[26] = (w16 >> 8) & mask;
     out[27] = ((w16 >> 28) | (w17 << 4)) & mask;
@@ -1215,9 +1198,8 @@ struct ScalarUnpackerForWidth<uint32_t, 20> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 21> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 84;
 
@@ -1245,7 +1227,7 @@ struct ScalarUnpackerForWidth<uint32_t, 21> {
     const auto w18 = LoadInt<uint32_t>(in + 18 * 4);
     const auto w19 = LoadInt<uint32_t>(in + 19 * 4);
     const auto w20 = LoadInt<uint32_t>(in + 20 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 21) | (w1 << 11)) & mask;
     out[2] = (w1 >> 10) & mask;
     out[3] = ((w1 >> 31) | (w2 << 1)) & mask;
@@ -1282,9 +1264,8 @@ struct ScalarUnpackerForWidth<uint32_t, 21> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 22> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 88;
 
@@ -1313,7 +1294,7 @@ struct ScalarUnpackerForWidth<uint32_t, 22> {
     const auto w19 = LoadInt<uint32_t>(in + 19 * 4);
     const auto w20 = LoadInt<uint32_t>(in + 20 * 4);
     const auto w21 = LoadInt<uint32_t>(in + 21 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 22) | (w1 << 10)) & mask;
     out[2] = ((w1 >> 12) | (w2 << 20)) & mask;
     out[3] = (w2 >> 2) & mask;
@@ -1329,7 +1310,7 @@ struct ScalarUnpackerForWidth<uint32_t, 22> {
     out[13] = ((w8 >> 30) | (w9 << 2)) & mask;
     out[14] = ((w9 >> 20) | (w10 << 12)) & mask;
     out[15] = w10 >> 10;
-    out[16] = (w11) & mask;
+    out[16] = (w11)&mask;
     out[17] = ((w11 >> 22) | (w12 << 10)) & mask;
     out[18] = ((w12 >> 12) | (w13 << 20)) & mask;
     out[19] = (w13 >> 2) & mask;
@@ -1350,9 +1331,8 @@ struct ScalarUnpackerForWidth<uint32_t, 22> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 23> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 92;
 
@@ -1382,7 +1362,7 @@ struct ScalarUnpackerForWidth<uint32_t, 23> {
     const auto w20 = LoadInt<uint32_t>(in + 20 * 4);
     const auto w21 = LoadInt<uint32_t>(in + 21 * 4);
     const auto w22 = LoadInt<uint32_t>(in + 22 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 23) | (w1 << 9)) & mask;
     out[2] = ((w1 >> 14) | (w2 << 18)) & mask;
     out[3] = (w2 >> 5) & mask;
@@ -1419,9 +1399,8 @@ struct ScalarUnpackerForWidth<uint32_t, 23> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 24> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 96;
 
@@ -1452,35 +1431,35 @@ struct ScalarUnpackerForWidth<uint32_t, 24> {
     const auto w21 = LoadInt<uint32_t>(in + 21 * 4);
     const auto w22 = LoadInt<uint32_t>(in + 22 * 4);
     const auto w23 = LoadInt<uint32_t>(in + 23 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 24) | (w1 << 8)) & mask;
     out[2] = ((w1 >> 16) | (w2 << 16)) & mask;
     out[3] = w2 >> 8;
-    out[4] = (w3) & mask;
+    out[4] = (w3)&mask;
     out[5] = ((w3 >> 24) | (w4 << 8)) & mask;
     out[6] = ((w4 >> 16) | (w5 << 16)) & mask;
     out[7] = w5 >> 8;
-    out[8] = (w6) & mask;
+    out[8] = (w6)&mask;
     out[9] = ((w6 >> 24) | (w7 << 8)) & mask;
     out[10] = ((w7 >> 16) | (w8 << 16)) & mask;
     out[11] = w8 >> 8;
-    out[12] = (w9) & mask;
+    out[12] = (w9)&mask;
     out[13] = ((w9 >> 24) | (w10 << 8)) & mask;
     out[14] = ((w10 >> 16) | (w11 << 16)) & mask;
     out[15] = w11 >> 8;
-    out[16] = (w12) & mask;
+    out[16] = (w12)&mask;
     out[17] = ((w12 >> 24) | (w13 << 8)) & mask;
     out[18] = ((w13 >> 16) | (w14 << 16)) & mask;
     out[19] = w14 >> 8;
-    out[20] = (w15) & mask;
+    out[20] = (w15)&mask;
     out[21] = ((w15 >> 24) | (w16 << 8)) & mask;
     out[22] = ((w16 >> 16) | (w17 << 16)) & mask;
     out[23] = w17 >> 8;
-    out[24] = (w18) & mask;
+    out[24] = (w18)&mask;
     out[25] = ((w18 >> 24) | (w19 << 8)) & mask;
     out[26] = ((w19 >> 16) | (w20 << 16)) & mask;
     out[27] = w20 >> 8;
-    out[28] = (w21) & mask;
+    out[28] = (w21)&mask;
     out[29] = ((w21 >> 24) | (w22 << 8)) & mask;
     out[30] = ((w22 >> 16) | (w23 << 16)) & mask;
     out[31] = w23 >> 8;
@@ -1489,9 +1468,8 @@ struct ScalarUnpackerForWidth<uint32_t, 24> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 25> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 100;
 
@@ -1523,7 +1501,7 @@ struct ScalarUnpackerForWidth<uint32_t, 25> {
     const auto w22 = LoadInt<uint32_t>(in + 22 * 4);
     const auto w23 = LoadInt<uint32_t>(in + 23 * 4);
     const auto w24 = LoadInt<uint32_t>(in + 24 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 25) | (w1 << 7)) & mask;
     out[2] = ((w1 >> 18) | (w2 << 14)) & mask;
     out[3] = ((w2 >> 11) | (w3 << 21)) & mask;
@@ -1560,9 +1538,8 @@ struct ScalarUnpackerForWidth<uint32_t, 25> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 26> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 104;
 
@@ -1595,7 +1572,7 @@ struct ScalarUnpackerForWidth<uint32_t, 26> {
     const auto w23 = LoadInt<uint32_t>(in + 23 * 4);
     const auto w24 = LoadInt<uint32_t>(in + 24 * 4);
     const auto w25 = LoadInt<uint32_t>(in + 25 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 26) | (w1 << 6)) & mask;
     out[2] = ((w1 >> 20) | (w2 << 12)) & mask;
     out[3] = ((w2 >> 14) | (w3 << 18)) & mask;
@@ -1611,7 +1588,7 @@ struct ScalarUnpackerForWidth<uint32_t, 26> {
     out[13] = ((w10 >> 18) | (w11 << 14)) & mask;
     out[14] = ((w11 >> 12) | (w12 << 20)) & mask;
     out[15] = w12 >> 6;
-    out[16] = (w13) & mask;
+    out[16] = (w13)&mask;
     out[17] = ((w13 >> 26) | (w14 << 6)) & mask;
     out[18] = ((w14 >> 20) | (w15 << 12)) & mask;
     out[19] = ((w15 >> 14) | (w16 << 18)) & mask;
@@ -1632,9 +1609,8 @@ struct ScalarUnpackerForWidth<uint32_t, 26> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 27> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 108;
 
@@ -1668,7 +1644,7 @@ struct ScalarUnpackerForWidth<uint32_t, 27> {
     const auto w24 = LoadInt<uint32_t>(in + 24 * 4);
     const auto w25 = LoadInt<uint32_t>(in + 25 * 4);
     const auto w26 = LoadInt<uint32_t>(in + 26 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 27) | (w1 << 5)) & mask;
     out[2] = ((w1 >> 22) | (w2 << 10)) & mask;
     out[3] = ((w2 >> 17) | (w3 << 15)) & mask;
@@ -1705,9 +1681,8 @@ struct ScalarUnpackerForWidth<uint32_t, 27> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 28> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 112;
 
@@ -1742,7 +1717,7 @@ struct ScalarUnpackerForWidth<uint32_t, 28> {
     const auto w25 = LoadInt<uint32_t>(in + 25 * 4);
     const auto w26 = LoadInt<uint32_t>(in + 26 * 4);
     const auto w27 = LoadInt<uint32_t>(in + 27 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 28) | (w1 << 4)) & mask;
     out[2] = ((w1 >> 24) | (w2 << 8)) & mask;
     out[3] = ((w2 >> 20) | (w3 << 12)) & mask;
@@ -1750,7 +1725,7 @@ struct ScalarUnpackerForWidth<uint32_t, 28> {
     out[5] = ((w4 >> 12) | (w5 << 20)) & mask;
     out[6] = ((w5 >> 8) | (w6 << 24)) & mask;
     out[7] = w6 >> 4;
-    out[8] = (w7) & mask;
+    out[8] = (w7)&mask;
     out[9] = ((w7 >> 28) | (w8 << 4)) & mask;
     out[10] = ((w8 >> 24) | (w9 << 8)) & mask;
     out[11] = ((w9 >> 20) | (w10 << 12)) & mask;
@@ -1758,7 +1733,7 @@ struct ScalarUnpackerForWidth<uint32_t, 28> {
     out[13] = ((w11 >> 12) | (w12 << 20)) & mask;
     out[14] = ((w12 >> 8) | (w13 << 24)) & mask;
     out[15] = w13 >> 4;
-    out[16] = (w14) & mask;
+    out[16] = (w14)&mask;
     out[17] = ((w14 >> 28) | (w15 << 4)) & mask;
     out[18] = ((w15 >> 24) | (w16 << 8)) & mask;
     out[19] = ((w16 >> 20) | (w17 << 12)) & mask;
@@ -1766,7 +1741,7 @@ struct ScalarUnpackerForWidth<uint32_t, 28> {
     out[21] = ((w18 >> 12) | (w19 << 20)) & mask;
     out[22] = ((w19 >> 8) | (w20 << 24)) & mask;
     out[23] = w20 >> 4;
-    out[24] = (w21) & mask;
+    out[24] = (w21)&mask;
     out[25] = ((w21 >> 28) | (w22 << 4)) & mask;
     out[26] = ((w22 >> 24) | (w23 << 8)) & mask;
     out[27] = ((w23 >> 20) | (w24 << 12)) & mask;
@@ -1779,9 +1754,8 @@ struct ScalarUnpackerForWidth<uint32_t, 28> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 29> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 116;
 
@@ -1817,7 +1791,7 @@ struct ScalarUnpackerForWidth<uint32_t, 29> {
     const auto w26 = LoadInt<uint32_t>(in + 26 * 4);
     const auto w27 = LoadInt<uint32_t>(in + 27 * 4);
     const auto w28 = LoadInt<uint32_t>(in + 28 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 29) | (w1 << 3)) & mask;
     out[2] = ((w1 >> 26) | (w2 << 6)) & mask;
     out[3] = ((w2 >> 23) | (w3 << 9)) & mask;
@@ -1854,9 +1828,8 @@ struct ScalarUnpackerForWidth<uint32_t, 29> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 30> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 120;
 
@@ -1893,7 +1866,7 @@ struct ScalarUnpackerForWidth<uint32_t, 30> {
     const auto w27 = LoadInt<uint32_t>(in + 27 * 4);
     const auto w28 = LoadInt<uint32_t>(in + 28 * 4);
     const auto w29 = LoadInt<uint32_t>(in + 29 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 30) | (w1 << 2)) & mask;
     out[2] = ((w1 >> 28) | (w2 << 4)) & mask;
     out[3] = ((w2 >> 26) | (w3 << 6)) & mask;
@@ -1909,7 +1882,7 @@ struct ScalarUnpackerForWidth<uint32_t, 30> {
     out[13] = ((w12 >> 6) | (w13 << 26)) & mask;
     out[14] = ((w13 >> 4) | (w14 << 28)) & mask;
     out[15] = w14 >> 2;
-    out[16] = (w15) & mask;
+    out[16] = (w15)&mask;
     out[17] = ((w15 >> 30) | (w16 << 2)) & mask;
     out[18] = ((w16 >> 28) | (w17 << 4)) & mask;
     out[19] = ((w17 >> 26) | (w18 << 6)) & mask;
@@ -1930,9 +1903,8 @@ struct ScalarUnpackerForWidth<uint32_t, 30> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint32_t, 31> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 124;
 
@@ -1970,7 +1942,7 @@ struct ScalarUnpackerForWidth<uint32_t, 31> {
     const auto w28 = LoadInt<uint32_t>(in + 28 * 4);
     const auto w29 = LoadInt<uint32_t>(in + 29 * 4);
     const auto w30 = LoadInt<uint32_t>(in + 30 * 4);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 31) | (w1 << 1)) & mask;
     out[2] = ((w1 >> 30) | (w2 << 2)) & mask;
     out[3] = ((w2 >> 29) | (w3 << 3)) & mask;
@@ -2007,10 +1979,8 @@ struct ScalarUnpackerForWidth<uint32_t, 31> {
   }
 };
 
-
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 1> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 4;
 
@@ -2018,7 +1988,7 @@ struct ScalarUnpackerForWidth<uint64_t, 1> {
     constexpr uint64_t mask = ((uint64_t{1} << 1) - uint64_t{1});
 
     const auto w0 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 0 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 1) & mask;
     out[2] = (w0 >> 2) & mask;
     out[3] = (w0 >> 3) & mask;
@@ -2055,9 +2025,8 @@ struct ScalarUnpackerForWidth<uint64_t, 1> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 2> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 8;
 
@@ -2065,7 +2034,7 @@ struct ScalarUnpackerForWidth<uint64_t, 2> {
     constexpr uint64_t mask = ((uint64_t{1} << 2) - uint64_t{1});
 
     const auto w0 = LoadInt<uint64_t>(in + 0 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 2) & mask;
     out[2] = (w0 >> 4) & mask;
     out[3] = (w0 >> 6) & mask;
@@ -2102,9 +2071,8 @@ struct ScalarUnpackerForWidth<uint64_t, 2> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 3> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 12;
 
@@ -2113,7 +2081,7 @@ struct ScalarUnpackerForWidth<uint64_t, 3> {
 
     const auto w0 = LoadInt<uint64_t>(in + 0 * 8);
     const auto w1 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 1 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 3) & mask;
     out[2] = (w0 >> 6) & mask;
     out[3] = (w0 >> 9) & mask;
@@ -2150,9 +2118,8 @@ struct ScalarUnpackerForWidth<uint64_t, 3> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 4> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 16;
 
@@ -2161,7 +2128,7 @@ struct ScalarUnpackerForWidth<uint64_t, 4> {
 
     const auto w0 = LoadInt<uint64_t>(in + 0 * 8);
     const auto w1 = LoadInt<uint64_t>(in + 1 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 4) & mask;
     out[2] = (w0 >> 8) & mask;
     out[3] = (w0 >> 12) & mask;
@@ -2177,7 +2144,7 @@ struct ScalarUnpackerForWidth<uint64_t, 4> {
     out[13] = (w0 >> 52) & mask;
     out[14] = (w0 >> 56) & mask;
     out[15] = w0 >> 60;
-    out[16] = (w1) & mask;
+    out[16] = (w1)&mask;
     out[17] = (w1 >> 4) & mask;
     out[18] = (w1 >> 8) & mask;
     out[19] = (w1 >> 12) & mask;
@@ -2198,9 +2165,8 @@ struct ScalarUnpackerForWidth<uint64_t, 4> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 5> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 20;
 
@@ -2210,7 +2176,7 @@ struct ScalarUnpackerForWidth<uint64_t, 5> {
     const auto w0 = LoadInt<uint64_t>(in + 0 * 8);
     const auto w1 = LoadInt<uint64_t>(in + 1 * 8);
     const auto w2 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 2 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 5) & mask;
     out[2] = (w0 >> 10) & mask;
     out[3] = (w0 >> 15) & mask;
@@ -2247,9 +2213,8 @@ struct ScalarUnpackerForWidth<uint64_t, 5> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 6> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 24;
 
@@ -2259,7 +2224,7 @@ struct ScalarUnpackerForWidth<uint64_t, 6> {
     const auto w0 = LoadInt<uint64_t>(in + 0 * 8);
     const auto w1 = LoadInt<uint64_t>(in + 1 * 8);
     const auto w2 = LoadInt<uint64_t>(in + 2 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 6) & mask;
     out[2] = (w0 >> 12) & mask;
     out[3] = (w0 >> 18) & mask;
@@ -2296,9 +2261,8 @@ struct ScalarUnpackerForWidth<uint64_t, 6> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 7> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 28;
 
@@ -2309,7 +2273,7 @@ struct ScalarUnpackerForWidth<uint64_t, 7> {
     const auto w1 = LoadInt<uint64_t>(in + 1 * 8);
     const auto w2 = LoadInt<uint64_t>(in + 2 * 8);
     const auto w3 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 3 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 7) & mask;
     out[2] = (w0 >> 14) & mask;
     out[3] = (w0 >> 21) & mask;
@@ -2346,9 +2310,8 @@ struct ScalarUnpackerForWidth<uint64_t, 7> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 8> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 32;
 
@@ -2359,7 +2322,7 @@ struct ScalarUnpackerForWidth<uint64_t, 8> {
     const auto w1 = LoadInt<uint64_t>(in + 1 * 8);
     const auto w2 = LoadInt<uint64_t>(in + 2 * 8);
     const auto w3 = LoadInt<uint64_t>(in + 3 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 8) & mask;
     out[2] = (w0 >> 16) & mask;
     out[3] = (w0 >> 24) & mask;
@@ -2367,7 +2330,7 @@ struct ScalarUnpackerForWidth<uint64_t, 8> {
     out[5] = (w0 >> 40) & mask;
     out[6] = (w0 >> 48) & mask;
     out[7] = w0 >> 56;
-    out[8] = (w1) & mask;
+    out[8] = (w1)&mask;
     out[9] = (w1 >> 8) & mask;
     out[10] = (w1 >> 16) & mask;
     out[11] = (w1 >> 24) & mask;
@@ -2375,7 +2338,7 @@ struct ScalarUnpackerForWidth<uint64_t, 8> {
     out[13] = (w1 >> 40) & mask;
     out[14] = (w1 >> 48) & mask;
     out[15] = w1 >> 56;
-    out[16] = (w2) & mask;
+    out[16] = (w2)&mask;
     out[17] = (w2 >> 8) & mask;
     out[18] = (w2 >> 16) & mask;
     out[19] = (w2 >> 24) & mask;
@@ -2383,7 +2346,7 @@ struct ScalarUnpackerForWidth<uint64_t, 8> {
     out[21] = (w2 >> 40) & mask;
     out[22] = (w2 >> 48) & mask;
     out[23] = w2 >> 56;
-    out[24] = (w3) & mask;
+    out[24] = (w3)&mask;
     out[25] = (w3 >> 8) & mask;
     out[26] = (w3 >> 16) & mask;
     out[27] = (w3 >> 24) & mask;
@@ -2396,9 +2359,8 @@ struct ScalarUnpackerForWidth<uint64_t, 8> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 9> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 36;
 
@@ -2410,7 +2372,7 @@ struct ScalarUnpackerForWidth<uint64_t, 9> {
     const auto w2 = LoadInt<uint64_t>(in + 2 * 8);
     const auto w3 = LoadInt<uint64_t>(in + 3 * 8);
     const auto w4 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 4 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 9) & mask;
     out[2] = (w0 >> 18) & mask;
     out[3] = (w0 >> 27) & mask;
@@ -2447,9 +2409,8 @@ struct ScalarUnpackerForWidth<uint64_t, 9> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 10> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 40;
 
@@ -2461,7 +2422,7 @@ struct ScalarUnpackerForWidth<uint64_t, 10> {
     const auto w2 = LoadInt<uint64_t>(in + 2 * 8);
     const auto w3 = LoadInt<uint64_t>(in + 3 * 8);
     const auto w4 = LoadInt<uint64_t>(in + 4 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 10) & mask;
     out[2] = (w0 >> 20) & mask;
     out[3] = (w0 >> 30) & mask;
@@ -2498,9 +2459,8 @@ struct ScalarUnpackerForWidth<uint64_t, 10> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 11> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 44;
 
@@ -2513,7 +2473,7 @@ struct ScalarUnpackerForWidth<uint64_t, 11> {
     const auto w3 = LoadInt<uint64_t>(in + 3 * 8);
     const auto w4 = LoadInt<uint64_t>(in + 4 * 8);
     const auto w5 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 5 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 11) & mask;
     out[2] = (w0 >> 22) & mask;
     out[3] = (w0 >> 33) & mask;
@@ -2550,9 +2510,8 @@ struct ScalarUnpackerForWidth<uint64_t, 11> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 12> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 48;
 
@@ -2565,7 +2524,7 @@ struct ScalarUnpackerForWidth<uint64_t, 12> {
     const auto w3 = LoadInt<uint64_t>(in + 3 * 8);
     const auto w4 = LoadInt<uint64_t>(in + 4 * 8);
     const auto w5 = LoadInt<uint64_t>(in + 5 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 12) & mask;
     out[2] = (w0 >> 24) & mask;
     out[3] = (w0 >> 36) & mask;
@@ -2581,7 +2540,7 @@ struct ScalarUnpackerForWidth<uint64_t, 12> {
     out[13] = (w2 >> 28) & mask;
     out[14] = (w2 >> 40) & mask;
     out[15] = w2 >> 52;
-    out[16] = (w3) & mask;
+    out[16] = (w3)&mask;
     out[17] = (w3 >> 12) & mask;
     out[18] = (w3 >> 24) & mask;
     out[19] = (w3 >> 36) & mask;
@@ -2602,9 +2561,8 @@ struct ScalarUnpackerForWidth<uint64_t, 12> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 13> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 52;
 
@@ -2618,7 +2576,7 @@ struct ScalarUnpackerForWidth<uint64_t, 13> {
     const auto w4 = LoadInt<uint64_t>(in + 4 * 8);
     const auto w5 = LoadInt<uint64_t>(in + 5 * 8);
     const auto w6 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 6 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 13) & mask;
     out[2] = (w0 >> 26) & mask;
     out[3] = (w0 >> 39) & mask;
@@ -2655,9 +2613,8 @@ struct ScalarUnpackerForWidth<uint64_t, 13> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 14> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 56;
 
@@ -2671,7 +2628,7 @@ struct ScalarUnpackerForWidth<uint64_t, 14> {
     const auto w4 = LoadInt<uint64_t>(in + 4 * 8);
     const auto w5 = LoadInt<uint64_t>(in + 5 * 8);
     const auto w6 = LoadInt<uint64_t>(in + 6 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 14) & mask;
     out[2] = (w0 >> 28) & mask;
     out[3] = (w0 >> 42) & mask;
@@ -2708,9 +2665,8 @@ struct ScalarUnpackerForWidth<uint64_t, 14> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 15> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 60;
 
@@ -2725,7 +2681,7 @@ struct ScalarUnpackerForWidth<uint64_t, 15> {
     const auto w5 = LoadInt<uint64_t>(in + 5 * 8);
     const auto w6 = LoadInt<uint64_t>(in + 6 * 8);
     const auto w7 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 7 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 15) & mask;
     out[2] = (w0 >> 30) & mask;
     out[3] = (w0 >> 45) & mask;
@@ -2762,9 +2718,8 @@ struct ScalarUnpackerForWidth<uint64_t, 15> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 16> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 64;
 
@@ -2779,35 +2734,35 @@ struct ScalarUnpackerForWidth<uint64_t, 16> {
     const auto w5 = LoadInt<uint64_t>(in + 5 * 8);
     const auto w6 = LoadInt<uint64_t>(in + 6 * 8);
     const auto w7 = LoadInt<uint64_t>(in + 7 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 16) & mask;
     out[2] = (w0 >> 32) & mask;
     out[3] = w0 >> 48;
-    out[4] = (w1) & mask;
+    out[4] = (w1)&mask;
     out[5] = (w1 >> 16) & mask;
     out[6] = (w1 >> 32) & mask;
     out[7] = w1 >> 48;
-    out[8] = (w2) & mask;
+    out[8] = (w2)&mask;
     out[9] = (w2 >> 16) & mask;
     out[10] = (w2 >> 32) & mask;
     out[11] = w2 >> 48;
-    out[12] = (w3) & mask;
+    out[12] = (w3)&mask;
     out[13] = (w3 >> 16) & mask;
     out[14] = (w3 >> 32) & mask;
     out[15] = w3 >> 48;
-    out[16] = (w4) & mask;
+    out[16] = (w4)&mask;
     out[17] = (w4 >> 16) & mask;
     out[18] = (w4 >> 32) & mask;
     out[19] = w4 >> 48;
-    out[20] = (w5) & mask;
+    out[20] = (w5)&mask;
     out[21] = (w5 >> 16) & mask;
     out[22] = (w5 >> 32) & mask;
     out[23] = w5 >> 48;
-    out[24] = (w6) & mask;
+    out[24] = (w6)&mask;
     out[25] = (w6 >> 16) & mask;
     out[26] = (w6 >> 32) & mask;
     out[27] = w6 >> 48;
-    out[28] = (w7) & mask;
+    out[28] = (w7)&mask;
     out[29] = (w7 >> 16) & mask;
     out[30] = (w7 >> 32) & mask;
     out[31] = w7 >> 48;
@@ -2816,9 +2771,8 @@ struct ScalarUnpackerForWidth<uint64_t, 16> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 17> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 68;
 
@@ -2834,7 +2788,7 @@ struct ScalarUnpackerForWidth<uint64_t, 17> {
     const auto w6 = LoadInt<uint64_t>(in + 6 * 8);
     const auto w7 = LoadInt<uint64_t>(in + 7 * 8);
     const auto w8 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 8 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 17) & mask;
     out[2] = (w0 >> 34) & mask;
     out[3] = ((w0 >> 51) | (w1 << 13)) & mask;
@@ -2871,9 +2825,8 @@ struct ScalarUnpackerForWidth<uint64_t, 17> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 18> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 72;
 
@@ -2889,7 +2842,7 @@ struct ScalarUnpackerForWidth<uint64_t, 18> {
     const auto w6 = LoadInt<uint64_t>(in + 6 * 8);
     const auto w7 = LoadInt<uint64_t>(in + 7 * 8);
     const auto w8 = LoadInt<uint64_t>(in + 8 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 18) & mask;
     out[2] = (w0 >> 36) & mask;
     out[3] = ((w0 >> 54) | (w1 << 10)) & mask;
@@ -2926,9 +2879,8 @@ struct ScalarUnpackerForWidth<uint64_t, 18> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 19> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 76;
 
@@ -2945,7 +2897,7 @@ struct ScalarUnpackerForWidth<uint64_t, 19> {
     const auto w7 = LoadInt<uint64_t>(in + 7 * 8);
     const auto w8 = LoadInt<uint64_t>(in + 8 * 8);
     const auto w9 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 9 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 19) & mask;
     out[2] = (w0 >> 38) & mask;
     out[3] = ((w0 >> 57) | (w1 << 7)) & mask;
@@ -2982,9 +2934,8 @@ struct ScalarUnpackerForWidth<uint64_t, 19> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 20> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 80;
 
@@ -3001,7 +2952,7 @@ struct ScalarUnpackerForWidth<uint64_t, 20> {
     const auto w7 = LoadInt<uint64_t>(in + 7 * 8);
     const auto w8 = LoadInt<uint64_t>(in + 8 * 8);
     const auto w9 = LoadInt<uint64_t>(in + 9 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 20) & mask;
     out[2] = (w0 >> 40) & mask;
     out[3] = ((w0 >> 60) | (w1 << 4)) & mask;
@@ -3017,7 +2968,7 @@ struct ScalarUnpackerForWidth<uint64_t, 20> {
     out[13] = (w4 >> 4) & mask;
     out[14] = (w4 >> 24) & mask;
     out[15] = w4 >> 44;
-    out[16] = (w5) & mask;
+    out[16] = (w5)&mask;
     out[17] = (w5 >> 20) & mask;
     out[18] = (w5 >> 40) & mask;
     out[19] = ((w5 >> 60) | (w6 << 4)) & mask;
@@ -3038,9 +2989,8 @@ struct ScalarUnpackerForWidth<uint64_t, 20> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 21> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 84;
 
@@ -3058,7 +3008,7 @@ struct ScalarUnpackerForWidth<uint64_t, 21> {
     const auto w8 = LoadInt<uint64_t>(in + 8 * 8);
     const auto w9 = LoadInt<uint64_t>(in + 9 * 8);
     const auto w10 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 10 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 21) & mask;
     out[2] = (w0 >> 42) & mask;
     out[3] = ((w0 >> 63) | (w1 << 1)) & mask;
@@ -3095,9 +3045,8 @@ struct ScalarUnpackerForWidth<uint64_t, 21> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 22> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 88;
 
@@ -3115,7 +3064,7 @@ struct ScalarUnpackerForWidth<uint64_t, 22> {
     const auto w8 = LoadInt<uint64_t>(in + 8 * 8);
     const auto w9 = LoadInt<uint64_t>(in + 9 * 8);
     const auto w10 = LoadInt<uint64_t>(in + 10 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 22) & mask;
     out[2] = ((w0 >> 44) | (w1 << 20)) & mask;
     out[3] = (w1 >> 2) & mask;
@@ -3152,9 +3101,8 @@ struct ScalarUnpackerForWidth<uint64_t, 22> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 23> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 92;
 
@@ -3173,7 +3121,7 @@ struct ScalarUnpackerForWidth<uint64_t, 23> {
     const auto w9 = LoadInt<uint64_t>(in + 9 * 8);
     const auto w10 = LoadInt<uint64_t>(in + 10 * 8);
     const auto w11 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 11 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 23) & mask;
     out[2] = ((w0 >> 46) | (w1 << 18)) & mask;
     out[3] = (w1 >> 5) & mask;
@@ -3210,9 +3158,8 @@ struct ScalarUnpackerForWidth<uint64_t, 23> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 24> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 96;
 
@@ -3231,7 +3178,7 @@ struct ScalarUnpackerForWidth<uint64_t, 24> {
     const auto w9 = LoadInt<uint64_t>(in + 9 * 8);
     const auto w10 = LoadInt<uint64_t>(in + 10 * 8);
     const auto w11 = LoadInt<uint64_t>(in + 11 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 24) & mask;
     out[2] = ((w0 >> 48) | (w1 << 16)) & mask;
     out[3] = (w1 >> 8) & mask;
@@ -3239,7 +3186,7 @@ struct ScalarUnpackerForWidth<uint64_t, 24> {
     out[5] = ((w1 >> 56) | (w2 << 8)) & mask;
     out[6] = (w2 >> 16) & mask;
     out[7] = w2 >> 40;
-    out[8] = (w3) & mask;
+    out[8] = (w3)&mask;
     out[9] = (w3 >> 24) & mask;
     out[10] = ((w3 >> 48) | (w4 << 16)) & mask;
     out[11] = (w4 >> 8) & mask;
@@ -3247,7 +3194,7 @@ struct ScalarUnpackerForWidth<uint64_t, 24> {
     out[13] = ((w4 >> 56) | (w5 << 8)) & mask;
     out[14] = (w5 >> 16) & mask;
     out[15] = w5 >> 40;
-    out[16] = (w6) & mask;
+    out[16] = (w6)&mask;
     out[17] = (w6 >> 24) & mask;
     out[18] = ((w6 >> 48) | (w7 << 16)) & mask;
     out[19] = (w7 >> 8) & mask;
@@ -3255,7 +3202,7 @@ struct ScalarUnpackerForWidth<uint64_t, 24> {
     out[21] = ((w7 >> 56) | (w8 << 8)) & mask;
     out[22] = (w8 >> 16) & mask;
     out[23] = w8 >> 40;
-    out[24] = (w9) & mask;
+    out[24] = (w9)&mask;
     out[25] = (w9 >> 24) & mask;
     out[26] = ((w9 >> 48) | (w10 << 16)) & mask;
     out[27] = (w10 >> 8) & mask;
@@ -3268,9 +3215,8 @@ struct ScalarUnpackerForWidth<uint64_t, 24> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 25> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 100;
 
@@ -3290,7 +3236,7 @@ struct ScalarUnpackerForWidth<uint64_t, 25> {
     const auto w10 = LoadInt<uint64_t>(in + 10 * 8);
     const auto w11 = LoadInt<uint64_t>(in + 11 * 8);
     const auto w12 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 12 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 25) & mask;
     out[2] = ((w0 >> 50) | (w1 << 14)) & mask;
     out[3] = (w1 >> 11) & mask;
@@ -3327,9 +3273,8 @@ struct ScalarUnpackerForWidth<uint64_t, 25> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 26> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 104;
 
@@ -3349,7 +3294,7 @@ struct ScalarUnpackerForWidth<uint64_t, 26> {
     const auto w10 = LoadInt<uint64_t>(in + 10 * 8);
     const auto w11 = LoadInt<uint64_t>(in + 11 * 8);
     const auto w12 = LoadInt<uint64_t>(in + 12 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 26) & mask;
     out[2] = ((w0 >> 52) | (w1 << 12)) & mask;
     out[3] = (w1 >> 14) & mask;
@@ -3386,9 +3331,8 @@ struct ScalarUnpackerForWidth<uint64_t, 26> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 27> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 108;
 
@@ -3409,7 +3353,7 @@ struct ScalarUnpackerForWidth<uint64_t, 27> {
     const auto w11 = LoadInt<uint64_t>(in + 11 * 8);
     const auto w12 = LoadInt<uint64_t>(in + 12 * 8);
     const auto w13 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 13 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 27) & mask;
     out[2] = ((w0 >> 54) | (w1 << 10)) & mask;
     out[3] = (w1 >> 17) & mask;
@@ -3446,9 +3390,8 @@ struct ScalarUnpackerForWidth<uint64_t, 27> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 28> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 112;
 
@@ -3469,7 +3412,7 @@ struct ScalarUnpackerForWidth<uint64_t, 28> {
     const auto w11 = LoadInt<uint64_t>(in + 11 * 8);
     const auto w12 = LoadInt<uint64_t>(in + 12 * 8);
     const auto w13 = LoadInt<uint64_t>(in + 13 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 28) & mask;
     out[2] = ((w0 >> 56) | (w1 << 8)) & mask;
     out[3] = (w1 >> 20) & mask;
@@ -3485,7 +3428,7 @@ struct ScalarUnpackerForWidth<uint64_t, 28> {
     out[13] = ((w5 >> 44) | (w6 << 20)) & mask;
     out[14] = (w6 >> 8) & mask;
     out[15] = w6 >> 36;
-    out[16] = (w7) & mask;
+    out[16] = (w7)&mask;
     out[17] = (w7 >> 28) & mask;
     out[18] = ((w7 >> 56) | (w8 << 8)) & mask;
     out[19] = (w8 >> 20) & mask;
@@ -3506,9 +3449,8 @@ struct ScalarUnpackerForWidth<uint64_t, 28> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 29> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 116;
 
@@ -3530,7 +3472,7 @@ struct ScalarUnpackerForWidth<uint64_t, 29> {
     const auto w12 = LoadInt<uint64_t>(in + 12 * 8);
     const auto w13 = LoadInt<uint64_t>(in + 13 * 8);
     const auto w14 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 14 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 29) & mask;
     out[2] = ((w0 >> 58) | (w1 << 6)) & mask;
     out[3] = (w1 >> 23) & mask;
@@ -3567,9 +3509,8 @@ struct ScalarUnpackerForWidth<uint64_t, 29> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 30> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 120;
 
@@ -3591,7 +3532,7 @@ struct ScalarUnpackerForWidth<uint64_t, 30> {
     const auto w12 = LoadInt<uint64_t>(in + 12 * 8);
     const auto w13 = LoadInt<uint64_t>(in + 13 * 8);
     const auto w14 = LoadInt<uint64_t>(in + 14 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 30) & mask;
     out[2] = ((w0 >> 60) | (w1 << 4)) & mask;
     out[3] = (w1 >> 26) & mask;
@@ -3628,9 +3569,8 @@ struct ScalarUnpackerForWidth<uint64_t, 30> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 31> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 124;
 
@@ -3653,7 +3593,7 @@ struct ScalarUnpackerForWidth<uint64_t, 31> {
     const auto w13 = LoadInt<uint64_t>(in + 13 * 8);
     const auto w14 = LoadInt<uint64_t>(in + 14 * 8);
     const auto w15 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 15 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = (w0 >> 31) & mask;
     out[2] = ((w0 >> 62) | (w1 << 2)) & mask;
     out[3] = (w1 >> 29) & mask;
@@ -3690,9 +3630,8 @@ struct ScalarUnpackerForWidth<uint64_t, 31> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 32> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 128;
 
@@ -3715,46 +3654,45 @@ struct ScalarUnpackerForWidth<uint64_t, 32> {
     const auto w13 = LoadInt<uint64_t>(in + 13 * 8);
     const auto w14 = LoadInt<uint64_t>(in + 14 * 8);
     const auto w15 = LoadInt<uint64_t>(in + 15 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = w0 >> 32;
-    out[2] = (w1) & mask;
+    out[2] = (w1)&mask;
     out[3] = w1 >> 32;
-    out[4] = (w2) & mask;
+    out[4] = (w2)&mask;
     out[5] = w2 >> 32;
-    out[6] = (w3) & mask;
+    out[6] = (w3)&mask;
     out[7] = w3 >> 32;
-    out[8] = (w4) & mask;
+    out[8] = (w4)&mask;
     out[9] = w4 >> 32;
-    out[10] = (w5) & mask;
+    out[10] = (w5)&mask;
     out[11] = w5 >> 32;
-    out[12] = (w6) & mask;
+    out[12] = (w6)&mask;
     out[13] = w6 >> 32;
-    out[14] = (w7) & mask;
+    out[14] = (w7)&mask;
     out[15] = w7 >> 32;
-    out[16] = (w8) & mask;
+    out[16] = (w8)&mask;
     out[17] = w8 >> 32;
-    out[18] = (w9) & mask;
+    out[18] = (w9)&mask;
     out[19] = w9 >> 32;
-    out[20] = (w10) & mask;
+    out[20] = (w10)&mask;
     out[21] = w10 >> 32;
-    out[22] = (w11) & mask;
+    out[22] = (w11)&mask;
     out[23] = w11 >> 32;
-    out[24] = (w12) & mask;
+    out[24] = (w12)&mask;
     out[25] = w12 >> 32;
-    out[26] = (w13) & mask;
+    out[26] = (w13)&mask;
     out[27] = w13 >> 32;
-    out[28] = (w14) & mask;
+    out[28] = (w14)&mask;
     out[29] = w14 >> 32;
-    out[30] = (w15) & mask;
+    out[30] = (w15)&mask;
     out[31] = w15 >> 32;
 
     return in + (16 * 8);
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 33> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 132;
 
@@ -3778,7 +3716,7 @@ struct ScalarUnpackerForWidth<uint64_t, 33> {
     const auto w14 = LoadInt<uint64_t>(in + 14 * 8);
     const auto w15 = LoadInt<uint64_t>(in + 15 * 8);
     const auto w16 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 16 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 33) | (w1 << 31)) & mask;
     out[2] = (w1 >> 2) & mask;
     out[3] = ((w1 >> 35) | (w2 << 29)) & mask;
@@ -3815,9 +3753,8 @@ struct ScalarUnpackerForWidth<uint64_t, 33> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 34> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 136;
 
@@ -3841,7 +3778,7 @@ struct ScalarUnpackerForWidth<uint64_t, 34> {
     const auto w14 = LoadInt<uint64_t>(in + 14 * 8);
     const auto w15 = LoadInt<uint64_t>(in + 15 * 8);
     const auto w16 = LoadInt<uint64_t>(in + 16 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 34) | (w1 << 30)) & mask;
     out[2] = (w1 >> 4) & mask;
     out[3] = ((w1 >> 38) | (w2 << 26)) & mask;
@@ -3878,9 +3815,8 @@ struct ScalarUnpackerForWidth<uint64_t, 34> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 35> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 140;
 
@@ -3905,7 +3841,7 @@ struct ScalarUnpackerForWidth<uint64_t, 35> {
     const auto w15 = LoadInt<uint64_t>(in + 15 * 8);
     const auto w16 = LoadInt<uint64_t>(in + 16 * 8);
     const auto w17 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 17 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 35) | (w1 << 29)) & mask;
     out[2] = (w1 >> 6) & mask;
     out[3] = ((w1 >> 41) | (w2 << 23)) & mask;
@@ -3942,9 +3878,8 @@ struct ScalarUnpackerForWidth<uint64_t, 35> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 36> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 144;
 
@@ -3969,7 +3904,7 @@ struct ScalarUnpackerForWidth<uint64_t, 36> {
     const auto w15 = LoadInt<uint64_t>(in + 15 * 8);
     const auto w16 = LoadInt<uint64_t>(in + 16 * 8);
     const auto w17 = LoadInt<uint64_t>(in + 17 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 36) | (w1 << 28)) & mask;
     out[2] = (w1 >> 8) & mask;
     out[3] = ((w1 >> 44) | (w2 << 20)) & mask;
@@ -3985,7 +3920,7 @@ struct ScalarUnpackerForWidth<uint64_t, 36> {
     out[13] = (w7 >> 20) & mask;
     out[14] = ((w7 >> 56) | (w8 << 8)) & mask;
     out[15] = w8 >> 28;
-    out[16] = (w9) & mask;
+    out[16] = (w9)&mask;
     out[17] = ((w9 >> 36) | (w10 << 28)) & mask;
     out[18] = (w10 >> 8) & mask;
     out[19] = ((w10 >> 44) | (w11 << 20)) & mask;
@@ -4006,9 +3941,8 @@ struct ScalarUnpackerForWidth<uint64_t, 36> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 37> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 148;
 
@@ -4034,7 +3968,7 @@ struct ScalarUnpackerForWidth<uint64_t, 37> {
     const auto w16 = LoadInt<uint64_t>(in + 16 * 8);
     const auto w17 = LoadInt<uint64_t>(in + 17 * 8);
     const auto w18 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 18 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 37) | (w1 << 27)) & mask;
     out[2] = (w1 >> 10) & mask;
     out[3] = ((w1 >> 47) | (w2 << 17)) & mask;
@@ -4071,9 +4005,8 @@ struct ScalarUnpackerForWidth<uint64_t, 37> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 38> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 152;
 
@@ -4099,7 +4032,7 @@ struct ScalarUnpackerForWidth<uint64_t, 38> {
     const auto w16 = LoadInt<uint64_t>(in + 16 * 8);
     const auto w17 = LoadInt<uint64_t>(in + 17 * 8);
     const auto w18 = LoadInt<uint64_t>(in + 18 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 38) | (w1 << 26)) & mask;
     out[2] = (w1 >> 12) & mask;
     out[3] = ((w1 >> 50) | (w2 << 14)) & mask;
@@ -4136,9 +4069,8 @@ struct ScalarUnpackerForWidth<uint64_t, 38> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 39> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 156;
 
@@ -4165,7 +4097,7 @@ struct ScalarUnpackerForWidth<uint64_t, 39> {
     const auto w17 = LoadInt<uint64_t>(in + 17 * 8);
     const auto w18 = LoadInt<uint64_t>(in + 18 * 8);
     const auto w19 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 19 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 39) | (w1 << 25)) & mask;
     out[2] = (w1 >> 14) & mask;
     out[3] = ((w1 >> 53) | (w2 << 11)) & mask;
@@ -4202,9 +4134,8 @@ struct ScalarUnpackerForWidth<uint64_t, 39> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 40> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 160;
 
@@ -4231,7 +4162,7 @@ struct ScalarUnpackerForWidth<uint64_t, 40> {
     const auto w17 = LoadInt<uint64_t>(in + 17 * 8);
     const auto w18 = LoadInt<uint64_t>(in + 18 * 8);
     const auto w19 = LoadInt<uint64_t>(in + 19 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 40) | (w1 << 24)) & mask;
     out[2] = (w1 >> 16) & mask;
     out[3] = ((w1 >> 56) | (w2 << 8)) & mask;
@@ -4239,7 +4170,7 @@ struct ScalarUnpackerForWidth<uint64_t, 40> {
     out[5] = (w3 >> 8) & mask;
     out[6] = ((w3 >> 48) | (w4 << 16)) & mask;
     out[7] = w4 >> 24;
-    out[8] = (w5) & mask;
+    out[8] = (w5)&mask;
     out[9] = ((w5 >> 40) | (w6 << 24)) & mask;
     out[10] = (w6 >> 16) & mask;
     out[11] = ((w6 >> 56) | (w7 << 8)) & mask;
@@ -4247,7 +4178,7 @@ struct ScalarUnpackerForWidth<uint64_t, 40> {
     out[13] = (w8 >> 8) & mask;
     out[14] = ((w8 >> 48) | (w9 << 16)) & mask;
     out[15] = w9 >> 24;
-    out[16] = (w10) & mask;
+    out[16] = (w10)&mask;
     out[17] = ((w10 >> 40) | (w11 << 24)) & mask;
     out[18] = (w11 >> 16) & mask;
     out[19] = ((w11 >> 56) | (w12 << 8)) & mask;
@@ -4255,7 +4186,7 @@ struct ScalarUnpackerForWidth<uint64_t, 40> {
     out[21] = (w13 >> 8) & mask;
     out[22] = ((w13 >> 48) | (w14 << 16)) & mask;
     out[23] = w14 >> 24;
-    out[24] = (w15) & mask;
+    out[24] = (w15)&mask;
     out[25] = ((w15 >> 40) | (w16 << 24)) & mask;
     out[26] = (w16 >> 16) & mask;
     out[27] = ((w16 >> 56) | (w17 << 8)) & mask;
@@ -4268,9 +4199,8 @@ struct ScalarUnpackerForWidth<uint64_t, 40> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 41> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 164;
 
@@ -4298,7 +4228,7 @@ struct ScalarUnpackerForWidth<uint64_t, 41> {
     const auto w18 = LoadInt<uint64_t>(in + 18 * 8);
     const auto w19 = LoadInt<uint64_t>(in + 19 * 8);
     const auto w20 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 20 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 41) | (w1 << 23)) & mask;
     out[2] = (w1 >> 18) & mask;
     out[3] = ((w1 >> 59) | (w2 << 5)) & mask;
@@ -4335,9 +4265,8 @@ struct ScalarUnpackerForWidth<uint64_t, 41> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 42> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 168;
 
@@ -4365,7 +4294,7 @@ struct ScalarUnpackerForWidth<uint64_t, 42> {
     const auto w18 = LoadInt<uint64_t>(in + 18 * 8);
     const auto w19 = LoadInt<uint64_t>(in + 19 * 8);
     const auto w20 = LoadInt<uint64_t>(in + 20 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 42) | (w1 << 22)) & mask;
     out[2] = (w1 >> 20) & mask;
     out[3] = ((w1 >> 62) | (w2 << 2)) & mask;
@@ -4402,9 +4331,8 @@ struct ScalarUnpackerForWidth<uint64_t, 42> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 43> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 172;
 
@@ -4433,7 +4361,7 @@ struct ScalarUnpackerForWidth<uint64_t, 43> {
     const auto w19 = LoadInt<uint64_t>(in + 19 * 8);
     const auto w20 = LoadInt<uint64_t>(in + 20 * 8);
     const auto w21 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 21 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 43) | (w1 << 21)) & mask;
     out[2] = ((w1 >> 22) | (w2 << 42)) & mask;
     out[3] = (w2 >> 1) & mask;
@@ -4470,9 +4398,8 @@ struct ScalarUnpackerForWidth<uint64_t, 43> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 44> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 176;
 
@@ -4501,7 +4428,7 @@ struct ScalarUnpackerForWidth<uint64_t, 44> {
     const auto w19 = LoadInt<uint64_t>(in + 19 * 8);
     const auto w20 = LoadInt<uint64_t>(in + 20 * 8);
     const auto w21 = LoadInt<uint64_t>(in + 21 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 44) | (w1 << 20)) & mask;
     out[2] = ((w1 >> 24) | (w2 << 40)) & mask;
     out[3] = (w2 >> 4) & mask;
@@ -4517,7 +4444,7 @@ struct ScalarUnpackerForWidth<uint64_t, 44> {
     out[13] = ((w8 >> 60) | (w9 << 4)) & mask;
     out[14] = ((w9 >> 40) | (w10 << 24)) & mask;
     out[15] = w10 >> 20;
-    out[16] = (w11) & mask;
+    out[16] = (w11)&mask;
     out[17] = ((w11 >> 44) | (w12 << 20)) & mask;
     out[18] = ((w12 >> 24) | (w13 << 40)) & mask;
     out[19] = (w13 >> 4) & mask;
@@ -4538,9 +4465,8 @@ struct ScalarUnpackerForWidth<uint64_t, 44> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 45> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 180;
 
@@ -4570,7 +4496,7 @@ struct ScalarUnpackerForWidth<uint64_t, 45> {
     const auto w20 = LoadInt<uint64_t>(in + 20 * 8);
     const auto w21 = LoadInt<uint64_t>(in + 21 * 8);
     const auto w22 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 22 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 45) | (w1 << 19)) & mask;
     out[2] = ((w1 >> 26) | (w2 << 38)) & mask;
     out[3] = (w2 >> 7) & mask;
@@ -4607,9 +4533,8 @@ struct ScalarUnpackerForWidth<uint64_t, 45> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 46> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 184;
 
@@ -4639,7 +4564,7 @@ struct ScalarUnpackerForWidth<uint64_t, 46> {
     const auto w20 = LoadInt<uint64_t>(in + 20 * 8);
     const auto w21 = LoadInt<uint64_t>(in + 21 * 8);
     const auto w22 = LoadInt<uint64_t>(in + 22 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 46) | (w1 << 18)) & mask;
     out[2] = ((w1 >> 28) | (w2 << 36)) & mask;
     out[3] = (w2 >> 10) & mask;
@@ -4676,9 +4601,8 @@ struct ScalarUnpackerForWidth<uint64_t, 46> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 47> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 188;
 
@@ -4709,7 +4633,7 @@ struct ScalarUnpackerForWidth<uint64_t, 47> {
     const auto w21 = LoadInt<uint64_t>(in + 21 * 8);
     const auto w22 = LoadInt<uint64_t>(in + 22 * 8);
     const auto w23 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 23 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 47) | (w1 << 17)) & mask;
     out[2] = ((w1 >> 30) | (w2 << 34)) & mask;
     out[3] = (w2 >> 13) & mask;
@@ -4746,9 +4670,8 @@ struct ScalarUnpackerForWidth<uint64_t, 47> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 48> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 192;
 
@@ -4779,35 +4702,35 @@ struct ScalarUnpackerForWidth<uint64_t, 48> {
     const auto w21 = LoadInt<uint64_t>(in + 21 * 8);
     const auto w22 = LoadInt<uint64_t>(in + 22 * 8);
     const auto w23 = LoadInt<uint64_t>(in + 23 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 48) | (w1 << 16)) & mask;
     out[2] = ((w1 >> 32) | (w2 << 32)) & mask;
     out[3] = w2 >> 16;
-    out[4] = (w3) & mask;
+    out[4] = (w3)&mask;
     out[5] = ((w3 >> 48) | (w4 << 16)) & mask;
     out[6] = ((w4 >> 32) | (w5 << 32)) & mask;
     out[7] = w5 >> 16;
-    out[8] = (w6) & mask;
+    out[8] = (w6)&mask;
     out[9] = ((w6 >> 48) | (w7 << 16)) & mask;
     out[10] = ((w7 >> 32) | (w8 << 32)) & mask;
     out[11] = w8 >> 16;
-    out[12] = (w9) & mask;
+    out[12] = (w9)&mask;
     out[13] = ((w9 >> 48) | (w10 << 16)) & mask;
     out[14] = ((w10 >> 32) | (w11 << 32)) & mask;
     out[15] = w11 >> 16;
-    out[16] = (w12) & mask;
+    out[16] = (w12)&mask;
     out[17] = ((w12 >> 48) | (w13 << 16)) & mask;
     out[18] = ((w13 >> 32) | (w14 << 32)) & mask;
     out[19] = w14 >> 16;
-    out[20] = (w15) & mask;
+    out[20] = (w15)&mask;
     out[21] = ((w15 >> 48) | (w16 << 16)) & mask;
     out[22] = ((w16 >> 32) | (w17 << 32)) & mask;
     out[23] = w17 >> 16;
-    out[24] = (w18) & mask;
+    out[24] = (w18)&mask;
     out[25] = ((w18 >> 48) | (w19 << 16)) & mask;
     out[26] = ((w19 >> 32) | (w20 << 32)) & mask;
     out[27] = w20 >> 16;
-    out[28] = (w21) & mask;
+    out[28] = (w21)&mask;
     out[29] = ((w21 >> 48) | (w22 << 16)) & mask;
     out[30] = ((w22 >> 32) | (w23 << 32)) & mask;
     out[31] = w23 >> 16;
@@ -4816,9 +4739,8 @@ struct ScalarUnpackerForWidth<uint64_t, 48> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 49> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 196;
 
@@ -4850,7 +4772,7 @@ struct ScalarUnpackerForWidth<uint64_t, 49> {
     const auto w22 = LoadInt<uint64_t>(in + 22 * 8);
     const auto w23 = LoadInt<uint64_t>(in + 23 * 8);
     const auto w24 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 24 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 49) | (w1 << 15)) & mask;
     out[2] = ((w1 >> 34) | (w2 << 30)) & mask;
     out[3] = ((w2 >> 19) | (w3 << 45)) & mask;
@@ -4887,9 +4809,8 @@ struct ScalarUnpackerForWidth<uint64_t, 49> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 50> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 200;
 
@@ -4921,7 +4842,7 @@ struct ScalarUnpackerForWidth<uint64_t, 50> {
     const auto w22 = LoadInt<uint64_t>(in + 22 * 8);
     const auto w23 = LoadInt<uint64_t>(in + 23 * 8);
     const auto w24 = LoadInt<uint64_t>(in + 24 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 50) | (w1 << 14)) & mask;
     out[2] = ((w1 >> 36) | (w2 << 28)) & mask;
     out[3] = ((w2 >> 22) | (w3 << 42)) & mask;
@@ -4958,9 +4879,8 @@ struct ScalarUnpackerForWidth<uint64_t, 50> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 51> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 204;
 
@@ -4993,7 +4913,7 @@ struct ScalarUnpackerForWidth<uint64_t, 51> {
     const auto w23 = LoadInt<uint64_t>(in + 23 * 8);
     const auto w24 = LoadInt<uint64_t>(in + 24 * 8);
     const auto w25 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 25 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 51) | (w1 << 13)) & mask;
     out[2] = ((w1 >> 38) | (w2 << 26)) & mask;
     out[3] = ((w2 >> 25) | (w3 << 39)) & mask;
@@ -5030,9 +4950,8 @@ struct ScalarUnpackerForWidth<uint64_t, 51> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 52> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 208;
 
@@ -5065,7 +4984,7 @@ struct ScalarUnpackerForWidth<uint64_t, 52> {
     const auto w23 = LoadInt<uint64_t>(in + 23 * 8);
     const auto w24 = LoadInt<uint64_t>(in + 24 * 8);
     const auto w25 = LoadInt<uint64_t>(in + 25 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 52) | (w1 << 12)) & mask;
     out[2] = ((w1 >> 40) | (w2 << 24)) & mask;
     out[3] = ((w2 >> 28) | (w3 << 36)) & mask;
@@ -5081,7 +5000,7 @@ struct ScalarUnpackerForWidth<uint64_t, 52> {
     out[13] = ((w10 >> 36) | (w11 << 28)) & mask;
     out[14] = ((w11 >> 24) | (w12 << 40)) & mask;
     out[15] = w12 >> 12;
-    out[16] = (w13) & mask;
+    out[16] = (w13)&mask;
     out[17] = ((w13 >> 52) | (w14 << 12)) & mask;
     out[18] = ((w14 >> 40) | (w15 << 24)) & mask;
     out[19] = ((w15 >> 28) | (w16 << 36)) & mask;
@@ -5102,9 +5021,8 @@ struct ScalarUnpackerForWidth<uint64_t, 52> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 53> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 212;
 
@@ -5138,7 +5056,7 @@ struct ScalarUnpackerForWidth<uint64_t, 53> {
     const auto w24 = LoadInt<uint64_t>(in + 24 * 8);
     const auto w25 = LoadInt<uint64_t>(in + 25 * 8);
     const auto w26 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 26 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 53) | (w1 << 11)) & mask;
     out[2] = ((w1 >> 42) | (w2 << 22)) & mask;
     out[3] = ((w2 >> 31) | (w3 << 33)) & mask;
@@ -5175,9 +5093,8 @@ struct ScalarUnpackerForWidth<uint64_t, 53> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 54> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 216;
 
@@ -5211,7 +5128,7 @@ struct ScalarUnpackerForWidth<uint64_t, 54> {
     const auto w24 = LoadInt<uint64_t>(in + 24 * 8);
     const auto w25 = LoadInt<uint64_t>(in + 25 * 8);
     const auto w26 = LoadInt<uint64_t>(in + 26 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 54) | (w1 << 10)) & mask;
     out[2] = ((w1 >> 44) | (w2 << 20)) & mask;
     out[3] = ((w2 >> 34) | (w3 << 30)) & mask;
@@ -5248,9 +5165,8 @@ struct ScalarUnpackerForWidth<uint64_t, 54> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 55> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 220;
 
@@ -5285,7 +5201,7 @@ struct ScalarUnpackerForWidth<uint64_t, 55> {
     const auto w25 = LoadInt<uint64_t>(in + 25 * 8);
     const auto w26 = LoadInt<uint64_t>(in + 26 * 8);
     const auto w27 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 27 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 55) | (w1 << 9)) & mask;
     out[2] = ((w1 >> 46) | (w2 << 18)) & mask;
     out[3] = ((w2 >> 37) | (w3 << 27)) & mask;
@@ -5322,9 +5238,8 @@ struct ScalarUnpackerForWidth<uint64_t, 55> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 56> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 224;
 
@@ -5359,7 +5274,7 @@ struct ScalarUnpackerForWidth<uint64_t, 56> {
     const auto w25 = LoadInt<uint64_t>(in + 25 * 8);
     const auto w26 = LoadInt<uint64_t>(in + 26 * 8);
     const auto w27 = LoadInt<uint64_t>(in + 27 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 56) | (w1 << 8)) & mask;
     out[2] = ((w1 >> 48) | (w2 << 16)) & mask;
     out[3] = ((w2 >> 40) | (w3 << 24)) & mask;
@@ -5367,7 +5282,7 @@ struct ScalarUnpackerForWidth<uint64_t, 56> {
     out[5] = ((w4 >> 24) | (w5 << 40)) & mask;
     out[6] = ((w5 >> 16) | (w6 << 48)) & mask;
     out[7] = w6 >> 8;
-    out[8] = (w7) & mask;
+    out[8] = (w7)&mask;
     out[9] = ((w7 >> 56) | (w8 << 8)) & mask;
     out[10] = ((w8 >> 48) | (w9 << 16)) & mask;
     out[11] = ((w9 >> 40) | (w10 << 24)) & mask;
@@ -5375,7 +5290,7 @@ struct ScalarUnpackerForWidth<uint64_t, 56> {
     out[13] = ((w11 >> 24) | (w12 << 40)) & mask;
     out[14] = ((w12 >> 16) | (w13 << 48)) & mask;
     out[15] = w13 >> 8;
-    out[16] = (w14) & mask;
+    out[16] = (w14)&mask;
     out[17] = ((w14 >> 56) | (w15 << 8)) & mask;
     out[18] = ((w15 >> 48) | (w16 << 16)) & mask;
     out[19] = ((w16 >> 40) | (w17 << 24)) & mask;
@@ -5383,7 +5298,7 @@ struct ScalarUnpackerForWidth<uint64_t, 56> {
     out[21] = ((w18 >> 24) | (w19 << 40)) & mask;
     out[22] = ((w19 >> 16) | (w20 << 48)) & mask;
     out[23] = w20 >> 8;
-    out[24] = (w21) & mask;
+    out[24] = (w21)&mask;
     out[25] = ((w21 >> 56) | (w22 << 8)) & mask;
     out[26] = ((w22 >> 48) | (w23 << 16)) & mask;
     out[27] = ((w23 >> 40) | (w24 << 24)) & mask;
@@ -5396,9 +5311,8 @@ struct ScalarUnpackerForWidth<uint64_t, 56> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 57> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 228;
 
@@ -5434,7 +5348,7 @@ struct ScalarUnpackerForWidth<uint64_t, 57> {
     const auto w26 = LoadInt<uint64_t>(in + 26 * 8);
     const auto w27 = LoadInt<uint64_t>(in + 27 * 8);
     const auto w28 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 28 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 57) | (w1 << 7)) & mask;
     out[2] = ((w1 >> 50) | (w2 << 14)) & mask;
     out[3] = ((w2 >> 43) | (w3 << 21)) & mask;
@@ -5471,9 +5385,8 @@ struct ScalarUnpackerForWidth<uint64_t, 57> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 58> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 232;
 
@@ -5509,7 +5422,7 @@ struct ScalarUnpackerForWidth<uint64_t, 58> {
     const auto w26 = LoadInt<uint64_t>(in + 26 * 8);
     const auto w27 = LoadInt<uint64_t>(in + 27 * 8);
     const auto w28 = LoadInt<uint64_t>(in + 28 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 58) | (w1 << 6)) & mask;
     out[2] = ((w1 >> 52) | (w2 << 12)) & mask;
     out[3] = ((w2 >> 46) | (w3 << 18)) & mask;
@@ -5546,9 +5459,8 @@ struct ScalarUnpackerForWidth<uint64_t, 58> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 59> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 236;
 
@@ -5585,7 +5497,7 @@ struct ScalarUnpackerForWidth<uint64_t, 59> {
     const auto w27 = LoadInt<uint64_t>(in + 27 * 8);
     const auto w28 = LoadInt<uint64_t>(in + 28 * 8);
     const auto w29 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 29 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 59) | (w1 << 5)) & mask;
     out[2] = ((w1 >> 54) | (w2 << 10)) & mask;
     out[3] = ((w2 >> 49) | (w3 << 15)) & mask;
@@ -5622,9 +5534,8 @@ struct ScalarUnpackerForWidth<uint64_t, 59> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 60> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 240;
 
@@ -5661,7 +5572,7 @@ struct ScalarUnpackerForWidth<uint64_t, 60> {
     const auto w27 = LoadInt<uint64_t>(in + 27 * 8);
     const auto w28 = LoadInt<uint64_t>(in + 28 * 8);
     const auto w29 = LoadInt<uint64_t>(in + 29 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 60) | (w1 << 4)) & mask;
     out[2] = ((w1 >> 56) | (w2 << 8)) & mask;
     out[3] = ((w2 >> 52) | (w3 << 12)) & mask;
@@ -5677,7 +5588,7 @@ struct ScalarUnpackerForWidth<uint64_t, 60> {
     out[13] = ((w12 >> 12) | (w13 << 52)) & mask;
     out[14] = ((w13 >> 8) | (w14 << 56)) & mask;
     out[15] = w14 >> 4;
-    out[16] = (w15) & mask;
+    out[16] = (w15)&mask;
     out[17] = ((w15 >> 60) | (w16 << 4)) & mask;
     out[18] = ((w16 >> 56) | (w17 << 8)) & mask;
     out[19] = ((w17 >> 52) | (w18 << 12)) & mask;
@@ -5698,9 +5609,8 @@ struct ScalarUnpackerForWidth<uint64_t, 60> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 61> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 244;
 
@@ -5738,7 +5648,7 @@ struct ScalarUnpackerForWidth<uint64_t, 61> {
     const auto w28 = LoadInt<uint64_t>(in + 28 * 8);
     const auto w29 = LoadInt<uint64_t>(in + 29 * 8);
     const auto w30 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 30 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 61) | (w1 << 3)) & mask;
     out[2] = ((w1 >> 58) | (w2 << 6)) & mask;
     out[3] = ((w2 >> 55) | (w3 << 9)) & mask;
@@ -5775,9 +5685,8 @@ struct ScalarUnpackerForWidth<uint64_t, 61> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 62> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 248;
 
@@ -5815,7 +5724,7 @@ struct ScalarUnpackerForWidth<uint64_t, 62> {
     const auto w28 = LoadInt<uint64_t>(in + 28 * 8);
     const auto w29 = LoadInt<uint64_t>(in + 29 * 8);
     const auto w30 = LoadInt<uint64_t>(in + 30 * 8);
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 62) | (w1 << 2)) & mask;
     out[2] = ((w1 >> 60) | (w2 << 4)) & mask;
     out[3] = ((w2 >> 58) | (w3 << 6)) & mask;
@@ -5852,9 +5761,8 @@ struct ScalarUnpackerForWidth<uint64_t, 62> {
   }
 };
 
-template<>
+template <>
 struct ScalarUnpackerForWidth<uint64_t, 63> {
-
   static constexpr int kValuesUnpacked = 32;
   static constexpr int kBytesRead = 252;
 
@@ -5893,7 +5801,7 @@ struct ScalarUnpackerForWidth<uint64_t, 63> {
     const auto w29 = LoadInt<uint64_t>(in + 29 * 8);
     const auto w30 = LoadInt<uint64_t>(in + 30 * 8);
     const auto w31 = static_cast<uint64_t>(LoadInt<uint32_t>(in + 31 * 8));
-    out[0] = (w0) & mask;
+    out[0] = (w0)&mask;
     out[1] = ((w0 >> 63) | (w1 << 1)) & mask;
     out[2] = ((w1 >> 62) | (w2 << 2)) & mask;
     out[3] = ((w2 >> 61) | (w3 << 3)) & mask;
@@ -5930,7 +5838,5 @@ struct ScalarUnpackerForWidth<uint64_t, 63> {
   }
 };
 
-
 }  // namespace
 }  // namespace arrow::internal
-

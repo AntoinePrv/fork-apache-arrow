@@ -9,9 +9,8 @@
 #include <string_view>
 #include <vector>
 
-template <std::unsigned_integral UintType = std::size_t,
-          std::ranges::input_range Range>
-auto MaxWidthBits(Range &&in) -> std::size_t {
+template <std::unsigned_integral UintType = std::size_t, std::ranges::input_range Range>
+auto MaxWidthBits(Range&& in) -> std::size_t {
   auto bit_width = [](auto x) { return std::bit_width(x); };
   const auto value = std::ranges::max(in, {}, bit_width);
   return static_cast<UintType>(bit_width(value));
@@ -29,8 +28,8 @@ auto ParseCsvInt(std::string_view s) -> std::vector<Uint> {
     }
 
     Uint v = 0;
-    const char *b = s.data() + pos;
-    const char *e = s.data() + s.size();
+    const char* b = s.data() + pos;
+    const char* e = s.data() + s.size();
     auto [p, ec] = std::from_chars(b, e, v);
     if (ec != std::errc()) {
       throw std::invalid_argument("invalid integer");
@@ -114,8 +113,7 @@ struct MakeAlphaValuesParams {
   char extra_bit = '*';
 };
 
-inline auto MakeAlphaValues(const MakeAlphaValuesParams &params)
-    -> std::vector<char> {
+inline auto MakeAlphaValues(const MakeAlphaValuesParams& params) -> std::vector<char> {
   const auto asked_letter_bits = params.packed_bit_size * params.n_values;
   const auto total_bits = params.total_bits.value_or(asked_letter_bits);
   auto out = std::vector<char>(total_bits, params.extra_bit);
@@ -136,9 +134,8 @@ inline auto MakeAlphaValues(const MakeAlphaValuesParams &params)
 template <template <int, Uint> typename Func, Uint U, std::size_t... Is>
 constexpr auto MakeJumpTableImpl(std::index_sequence<Is...>) {
   using FuncPtr = void (*)();
-  return std::array<FuncPtr, sizeof...(Is)>{+[]() {
-    Func<static_cast<int>(Is) + 1, U>::call();
-  }...};
+  return std::array<FuncPtr, sizeof...(Is)>{
+      +[]() { Func<static_cast<int>(Is) + 1, U>::call(); }...};
 }
 
 template <template <int, Uint> typename Func, Uint U, std::size_t MaxN>
@@ -151,30 +148,29 @@ constexpr auto MakeJumpTable() {
 /// Note: packed_bit_size must be in range [1, uint], 0 is invalid
 template <template <int, Uint> typename Func>
 void Dispatch(int packed_bit_size, Uint uint) {
-  constexpr auto table_u8 = MakeJumpTable<Func, Uint::u8,
-                                          static_cast<int>(Uint::u8)>();
-  constexpr auto table_u16 = MakeJumpTable<Func, Uint::u16,
-                                           static_cast<int>(Uint::u16)>();
-  constexpr auto table_u32 = MakeJumpTable<Func, Uint::u32,
-                                           static_cast<int>(Uint::u32)>();
-  constexpr auto table_u64 = MakeJumpTable<Func, Uint::u64,
-                                           static_cast<int>(Uint::u64)>();
+  constexpr auto table_u8 = MakeJumpTable<Func, Uint::u8, static_cast<int>(Uint::u8)>();
+  constexpr auto table_u16 =
+      MakeJumpTable<Func, Uint::u16, static_cast<int>(Uint::u16)>();
+  constexpr auto table_u32 =
+      MakeJumpTable<Func, Uint::u32, static_cast<int>(Uint::u32)>();
+  constexpr auto table_u64 =
+      MakeJumpTable<Func, Uint::u64, static_cast<int>(Uint::u64)>();
 
   if (packed_bit_size < 1 || packed_bit_size > static_cast<int>(uint)) {
     throw std::invalid_argument("invalid n for given Uint type");
   }
   switch (uint) {
-  case Uint::u8:
-    table_u8[packed_bit_size - 1]();
-    break;
-  case Uint::u16:
-    table_u16[packed_bit_size - 1]();
-    break;
-  case Uint::u32:
-    table_u32[packed_bit_size - 1]();
-    break;
-  case Uint::u64:
-    table_u64[packed_bit_size - 1]();
-    break;
+    case Uint::u8:
+      table_u8[packed_bit_size - 1]();
+      break;
+    case Uint::u16:
+      table_u16[packed_bit_size - 1]();
+      break;
+    case Uint::u32:
+      table_u32[packed_bit_size - 1]();
+      break;
+    case Uint::u64:
+      table_u64[packed_bit_size - 1]();
+      break;
   }
 }

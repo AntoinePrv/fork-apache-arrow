@@ -19,16 +19,32 @@
 
 #include <cassert>
 
-#define ARROW_CHECK(condition) assert(condition)
-#define ARROW_CHECK_OK(s) assert((s).ok())
-#define ARROW_CHECK_EQ(val1, val2) assert((val1) == (val2))
-#define ARROW_CHECK_NE(val1, val2) assert((val1) != (val2))
-#define ARROW_CHECK_LE(val1, val2) assert((val1) <= (val2))
-#define ARROW_CHECK_LT(val1, val2) assert((val1) < (val2))
-#define ARROW_CHECK_GE(val1, val2) assert((val1) >= (val2))
-#define ARROW_CHECK_GT(val1, val2) assert((val1) > (val2))
+namespace arrow::internal {
 
-#define ARROW_DCHECK    ARROW_CHECK
+/// Sink that silently discards anything streamed into it via <<.
+/// Used so that ARROW_CHECK(cond) << "message" compiles even though
+/// assert() returns void.
+struct NullLog {
+  template <typename T>
+  [[maybe_unused]] const NullLog& operator<<([[maybe_unused]] const T&) const {
+    return *this;
+  }
+};
+
+[[maybe_unused]] inline constexpr NullLog kNullLog{};
+
+}  // namespace arrow::internal
+
+#define ARROW_CHECK(condition) (assert(condition), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_OK(s) (assert((s).ok()), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_EQ(a, b) (assert((a) == (b)), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_NE(a, b) (assert((a) != (b)), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_LE(a, b) (assert((a) <= (b)), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_LT(a, b) (assert((a) < (b)), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_GE(a, b) (assert((a) >= (b)), ::arrow::internal::kNullLog)
+#define ARROW_CHECK_GT(a, b) (assert((a) > (b)), ::arrow::internal::kNullLog)
+
+#define ARROW_DCHECK ARROW_CHECK
 #define ARROW_DCHECK_OK ARROW_CHECK_OK
 #define ARROW_DCHECK_EQ ARROW_CHECK_EQ
 #define ARROW_DCHECK_NE ARROW_CHECK_NE
