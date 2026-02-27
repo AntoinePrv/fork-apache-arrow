@@ -16,34 +16,35 @@
 // under the License.
 
 #if defined(ARROW_HAVE_NEON)
-#  define UNPACK_PLATFORM unpack_neon
+#  define UNPACK_PLATFORM_OLD unpack_neon_old
 #elif defined(ARROW_HAVE_SSE4_2)
-#  define UNPACK_PLATFORM unpack_sse4_2
+#  define UNPACK_PLATFORM_OLD unpack_sse4_2_old
 #endif
 
-#if defined(UNPACK_PLATFORM)
+#if defined(UNPACK_PLATFORM_OLD)
 
 #  include "arrow/util/bpacking_dispatch_internal.h"
+#  include "arrow/util/bpacking_simd128_generated_internal.h"
 #  include "arrow/util/bpacking_simd_internal.h"
-#  include "arrow/util/bpacking_simd_kernel_internal.h"
 
 namespace arrow::internal::bpacking {
 
-template <typename UnpackedUint, int kPackedBitSize>
-using Simd128Kernel = Kernel<UnpackedUint, kPackedBitSize, 128>;
-
 template <typename Uint>
-void UNPACK_PLATFORM(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
-  return unpack_jump<Simd128Kernel>(in, out, opts);
+void UNPACK_PLATFORM_OLD(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<Simd128UnpackerForWidth>(in, out, opts);
 }
 
-template void UNPACK_PLATFORM<bool>(const uint8_t*, bool*, const UnpackOptions&);
-template void UNPACK_PLATFORM<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions&);
-template void UNPACK_PLATFORM<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
-template void UNPACK_PLATFORM<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
-template void UNPACK_PLATFORM<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<bool>(const uint8_t*, bool*, const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint8_t>(const uint8_t*, uint8_t*,
+                                           const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint16_t>(const uint8_t*, uint16_t*,
+                                            const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint32_t>(const uint8_t*, uint32_t*,
+                                            const UnpackOptions&);
+template void UNPACK_PLATFORM_OLD<uint64_t>(const uint8_t*, uint64_t*,
+                                            const UnpackOptions&);
 
 }  // namespace arrow::internal::bpacking
 
-#  undef UNPACK_PLATFORM
-#endif  // UNPACK_PLATFORM
+#  undef UNPACK_PLATFORM_OLD
+#endif  // UNPACK_PLATFORM_OLD

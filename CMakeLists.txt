@@ -6,17 +6,21 @@ include(CheckCXXCompilerFlag)
 # Collect SIMD compile definitions and per-file flags
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
 
-    set(ARROW_SIMD_SOURCES
-        arrow/util/bpacking_simd_default.cc
-        arrow/util/bpacking_simd_avx2.cc
-        arrow/util/bpacking_simd_avx512.cc
-    )
-
     check_cxx_compiler_flag("-msse4.2" COMPILER_SUPPORTS_SSE4_2)
     if(COMPILER_SUPPORTS_SSE4_2)
         list(APPEND ARROW_COMPILE_DEFINITIONS ARROW_HAVE_SSE4_2)
-        # Explicitly disable AVX2/AVX512 so this TU only uses SSE4.2 intrinsics
-        set_source_files_properties(arrow/util/bpacking_simd_default.cc
+        list(APPEND ARROW_SIMD_SOURCES
+            arrow/util/bpacking_simd_default.cc
+            arrow/util/bpacking_simd_default_old.cc
+            arrow/util/bpacking_simd_default_scalar_batch.cc
+            arrow/util/bpacking_simd_default_exact.cc
+        )
+        # Explicitly disable AVX2/AVX512 so these TUs only use SSE4.2 intrinsics
+        set_source_files_properties(
+            arrow/util/bpacking_simd_default.cc
+            arrow/util/bpacking_simd_default_old.cc
+            arrow/util/bpacking_simd_default_scalar_batch.cc
+            arrow/util/bpacking_simd_default_exact.cc
             PROPERTIES COMPILE_FLAGS "-msse4.2 -mno-avx2 -mno-avx512f"
         )
     endif()
@@ -24,8 +28,18 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
     check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
     if(COMPILER_SUPPORTS_AVX2)
         list(APPEND ARROW_COMPILE_DEFINITIONS ARROW_HAVE_RUNTIME_AVX2)
-        # Per-file flag so only this TU is compiled with avx2 intrinsics
-        set_source_files_properties(arrow/util/bpacking_simd_avx2.cc
+        list(APPEND ARROW_SIMD_SOURCES
+            arrow/util/bpacking_simd_avx2.cc
+            arrow/util/bpacking_simd_avx2_old.cc
+            arrow/util/bpacking_simd_avx2_scalar_batch.cc
+            arrow/util/bpacking_simd_avx2_exact.cc
+        )
+        # Per-file flag so only these TUs are compiled with avx2 intrinsics
+        set_source_files_properties(
+            arrow/util/bpacking_simd_avx2.cc
+            arrow/util/bpacking_simd_avx2_old.cc
+            arrow/util/bpacking_simd_avx2_scalar_batch.cc
+            arrow/util/bpacking_simd_avx2_exact.cc
             PROPERTIES COMPILE_FLAGS "-mavx2 -mno-avx512f"
         )
     endif()
@@ -33,23 +47,38 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
     check_cxx_compiler_flag("-mavx512f" COMPILER_SUPPORTS_AVX512)
     if(COMPILER_SUPPORTS_AVX512)
         list(APPEND ARROW_COMPILE_DEFINITIONS ARROW_HAVE_RUNTIME_AVX512)
-        set_source_files_properties(arrow/util/bpacking_simd_avx512.cc
+        list(APPEND ARROW_SIMD_SOURCES
+            arrow/util/bpacking_simd_avx512.cc
+            arrow/util/bpacking_simd_avx512_scalar_batch.cc
+            arrow/util/bpacking_simd_avx512_exact.cc
+        )
+        set_source_files_properties(
+            arrow/util/bpacking_simd_avx512.cc
+            arrow/util/bpacking_simd_avx512_scalar_batch.cc
+            arrow/util/bpacking_simd_avx512_exact.cc
             PROPERTIES COMPILE_FLAGS "-mavx512f -mavx512bw -mavx512cd -mavx512dq -mavx512vl"
         )
     endif()
 
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
 
-    set(ARROW_SIMD_SOURCES
-        arrow/util/bpacking_simd_default.cc
-    )
     list(APPEND ARROW_COMPILE_DEFINITIONS ARROW_HAVE_NEON)
+    list(APPEND ARROW_SIMD_SOURCES
+        arrow/util/bpacking_simd_default.cc
+        arrow/util/bpacking_simd_default_old.cc
+        arrow/util/bpacking_simd_default_scalar_batch.cc
+        arrow/util/bpacking_simd_default_exact.cc
+    )
     set(NEON_COMPILE_FLAGS "-march=armv8-a+simd")
     check_cxx_compiler_flag("-mno-sve" COMPILER_SUPPORTS_NO_SVE)
     if(COMPILER_SUPPORTS_NO_SVE)
         string(APPEND NEON_COMPILE_FLAGS " -mno-sve")
     endif()
-    set_source_files_properties(arrow/util/bpacking_simd_default.cc
+    set_source_files_properties(
+        arrow/util/bpacking_simd_default.cc
+        arrow/util/bpacking_simd_default_old.cc
+        arrow/util/bpacking_simd_default_scalar_batch.cc
+        arrow/util/bpacking_simd_default_exact.cc
         PROPERTIES COMPILE_FLAGS "${NEON_COMPILE_FLAGS}"
     )
 
@@ -61,6 +90,7 @@ find_package(xsimd REQUIRED)
 add_library(arrow
     arrow/util/bpacking.cc
     arrow/util/bpacking_scalar.cc
+    arrow/util/bpacking_scalar_exact.cc
     ${ARROW_SIMD_SOURCES}
 )
 target_compile_features(arrow PUBLIC cxx_std_20)

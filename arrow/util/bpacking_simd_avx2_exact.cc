@@ -17,20 +17,26 @@
 
 #include "arrow/util/bpacking_dispatch_internal.h"
 #include "arrow/util/bpacking_internal.h"
-#include "arrow/util/bpacking_scalar_generated_internal.h"
-#include "arrow/util/bpacking_scalar_internal.h"
+#include "arrow/util/bpacking_simd_internal.h"
+#include "arrow/util/bpacking_simd_kernel_internal.h"
 
 namespace arrow::internal::bpacking {
 
+template <typename UnpackedUint, int kPackedBitSize>
+using NoOpKernel256 = NoOpKernel<KernelTraits<UnpackedUint, kPackedBitSize, 256>>;
+
 template <typename Uint>
-void unpack_scalar(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
-  return unpack_jump<ScalarUnpackerForWidth>(in, out, opts);
+void unpack_avx2_exact(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
+  return unpack_jump<NoOpKernel256>(in, out, opts);
 }
 
-template void unpack_scalar<bool>(const uint8_t*, bool*, const UnpackOptions&);
-template void unpack_scalar<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions&);
-template void unpack_scalar<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
-template void unpack_scalar<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
-template void unpack_scalar<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
+template void unpack_avx2_exact<bool>(const uint8_t*, bool*, const UnpackOptions&);
+template void unpack_avx2_exact<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions&);
+template void unpack_avx2_exact<uint16_t>(const uint8_t*, uint16_t*,
+                                          const UnpackOptions&);
+template void unpack_avx2_exact<uint32_t>(const uint8_t*, uint32_t*,
+                                          const UnpackOptions&);
+template void unpack_avx2_exact<uint64_t>(const uint8_t*, uint64_t*,
+                                          const UnpackOptions&);
 
 }  // namespace arrow::internal::bpacking

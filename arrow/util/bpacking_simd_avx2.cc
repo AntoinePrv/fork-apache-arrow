@@ -17,8 +17,6 @@
 
 #include "arrow/util/bpacking_dispatch_internal.h"
 #include "arrow/util/bpacking_internal.h"
-#include "arrow/util/bpacking_scalar_generated_internal.h"
-#include "arrow/util/bpacking_simd256_generated_internal.h"
 #include "arrow/util/bpacking_simd_internal.h"
 #include "arrow/util/bpacking_simd_kernel_internal.h"
 
@@ -37,48 +35,5 @@ template void unpack_avx2<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions
 template void unpack_avx2<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
 template void unpack_avx2<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
 template void unpack_avx2<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
-
-template <typename Uint>
-void unpack_avx2_old(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
-  return unpack_jump<Simd256UnpackerForWidth>(in, out, opts);
-}
-
-template void unpack_avx2_old<bool>(const uint8_t*, bool*, const UnpackOptions&);
-template void unpack_avx2_old<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions&);
-template void unpack_avx2_old<uint16_t>(const uint8_t*, uint16_t*, const UnpackOptions&);
-template void unpack_avx2_old<uint32_t>(const uint8_t*, uint32_t*, const UnpackOptions&);
-template void unpack_avx2_old<uint64_t>(const uint8_t*, uint64_t*, const UnpackOptions&);
-
-template <typename Uint>
-void unpack_avx2_scalar_batch(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
-  return unpack_jump<ScalarUnpackerForWidth>(in, out, opts);
-}
-
-template void unpack_avx2_scalar_batch<bool>(const uint8_t*, bool*, const UnpackOptions&);
-template void unpack_avx2_scalar_batch<uint8_t>(const uint8_t*, uint8_t*,
-                                                const UnpackOptions&);
-template void unpack_avx2_scalar_batch<uint16_t>(const uint8_t*, uint16_t*,
-                                                 const UnpackOptions&);
-template void unpack_avx2_scalar_batch<uint32_t>(const uint8_t*, uint32_t*,
-                                                 const UnpackOptions&);
-template void unpack_avx2_scalar_batch<uint64_t>(const uint8_t*, uint64_t*,
-                                                 const UnpackOptions&);
-
-template <typename UnpackedUint, int kPackedBitSize>
-using NoOpKernel256 = NoOpKernel<KernelTraits<UnpackedUint, kPackedBitSize, 256>>;
-
-template <typename Uint>
-void unpack_avx2_exact(const uint8_t* in, Uint* out, const UnpackOptions& opts) {
-  return unpack_jump<NoOpKernel256>(in, out, opts);
-}
-
-template void unpack_avx2_exact<bool>(const uint8_t*, bool*, const UnpackOptions&);
-template void unpack_avx2_exact<uint8_t>(const uint8_t*, uint8_t*, const UnpackOptions&);
-template void unpack_avx2_exact<uint16_t>(const uint8_t*, uint16_t*,
-                                          const UnpackOptions&);
-template void unpack_avx2_exact<uint32_t>(const uint8_t*, uint32_t*,
-                                          const UnpackOptions&);
-template void unpack_avx2_exact<uint64_t>(const uint8_t*, uint64_t*,
-                                          const UnpackOptions&);
 
 }  // namespace arrow::internal::bpacking
