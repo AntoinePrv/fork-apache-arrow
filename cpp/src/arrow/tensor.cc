@@ -45,34 +45,36 @@ using internal::checked_cast;
 
 namespace internal {
 
-Status ComputeRowMajorStrides(const FixedWidthType& type,
-                              const std::vector<int64_t>& shape,
-                              std::vector<int64_t>* strides) {
-  const int byte_width = type.byte_width();
-  const size_t ndim = shape.size();
-
-  int64_t remaining = 0;
-  if (!shape.empty() && shape.front() > 0) {
-    remaining = byte_width;
-    for (size_t i = 1; i < ndim; ++i) {
-      if (internal::MultiplyWithOverflow(remaining, shape[i], &remaining)) {
-        return Status::Invalid(
-            "Row-major strides computed from shape would not fit in 64-bit integer");
-      }
-    }
+Status ComputeRowMajorStrides(std::span<const int64_t> shape, int64_t elem_size,
+                              std::span<int64_t> strides) {
+  if (strides.size() != shape.size()) {
+    return Status::Invalid("strides must have the same length as shape");
   }
 
-  if (remaining == 0) {
-    strides->assign(shape.size(), byte_width);
+  // An empty dimension makes the whole tensor empty, so any stride is as good.
+  if (std::find(shape.begin(), shape.end(), 0) != shape.end()) {
+    std::fill(strides.begin(), strides.end(), elem_size);
     return Status::OK();
   }
 
-  strides->push_back(remaining);
-  for (size_t i = 1; i < ndim; ++i) {
-    remaining /= shape[i];
-    strides->push_back(remaining);
+  bool overflow = false;
+  std::exclusive_scan(shape.rbegin(), shape.rend(), strides.rbegin(), elem_size,
+                      [&overflow](int64_t acc, int64_t dim) {
+                        int64_t product = 0;
+                        overflow |= internal::MultiplyWithOverflow(acc, dim, &product);
+                        return product;
+                      });
+  if (overflow) {
+    return Status::Invalid(
+        "Row-major strides computed from shape would not fit in 64-bit integer");
   }
+  return Status::OK();
+}
 
+Status ComputeRowMajorStrides(const FixedWidthType& type, std::span<const int64_t> shape,
+                              std::vector<int64_t>* strides) {
+  *strides = std::vector<int64_t>(shape.size());
+  RETURN_NOT_OK(ComputeRowMajorStrides(shape, type.byte_width(), *strides));
   return Status::OK();
 }
 
